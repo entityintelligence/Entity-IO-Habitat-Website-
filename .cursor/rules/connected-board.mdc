@@ -1,0 +1,32 @@
+---
+description: Keep the landing tiles as one connected 7-column board across all pages
+alwaysApply: true
+---
+
+# Connected tile board (locked)
+
+This landing is **one 7-column field**. Pages are viewports over that field, not separate layouts. The current spacing is the source of truth. Do not “improve” it.
+
+## Geometry (0-index col, row)
+
+- Pitch is `--feat-tile` + `--feat-g` (`--feat-g: 1rem` unless the existing mobile override).
+- Page 0: rows 0–2 top, 3–4 join. Join sits under the 3-row board with one gap.
+- Page 1 story: `--board-row: 5`, `--board-page: 1` (rows 5–8).
+- Page 2 plot: `--board-row: 9`, `--board-page: 2` (rows 9–13). Interactive click → ink / hub walk.
+- Page 3 enquire: `--board-row: 14`, `--board-page: 3` (rows 14–18). Form copy overlays; tiles stay on the same pitch.
+
+Story / plot / ask holds are **absolute** on the slide:
+
+`top: calc(50% - 0.35in + var(--field-nudge, 0px) - (3 * var(--feat-tile) + 2 * var(--feat-g)) / 2 + var(--board-row) * var(--feat-pitch) - var(--board-page) * 100%)`
+
+Work in **Entity io : Kit**, not KIT sales.
+
+## Do not
+
+- JS stitch / getBoundingClientRect nudges (`--plot-nudge`, `--ask-nudge`, `--story-nudge`)
+- Per-page mm/inch margin hacks that desync the pitch
+- `overflow: visible` on `.land-story` slides (clips neighbor tiles so rows do not double-paint)
+- Flatten epic hub or restyle remaining tiles
+- Core Product / Temporal Projection body copy on the plot page
+- `data-rise` offsets on field tiles
+- Edit the other Desktop folder named KIT sales
