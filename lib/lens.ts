@@ -18,5 +18,5 @@ export function lensFromPath(pathname: string): Lens | null {
 }
 
 export function isFieldPath(pathname: string) {
-  return pathname === "/" || pathname === "/habitat" || pathname === "/join";
+  return pathname === "/" || pathname === "/habitat" || pathname === "/join" || pathname === "/product";
 }

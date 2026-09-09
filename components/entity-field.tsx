@@ -100,6 +100,18 @@ function isHub(col: number, row: number, hop = HUB_HOME) {
 function isInkMark(col: number, row: number, at: Seat | null) {
   return !!at && col === at.c && row === at.r;
 }
+function hubGoal(page: number, inkAt: Seat | null): Seat {
+  if (page < 2) return HUB_HOME;
+  if (inkAt) return inkAt;
+  return HUB_DEST;
+}
+function hubSteps(cells: FieldCell[], from: Seat, page: number, inkAt: Seat | null) {
+  const at = cells.findIndex((cell) => cell.col === from.c && cell.row === from.r);
+  const goal = hubGoal(page, inkAt);
+  const to = cells.findIndex((cell) => cell.col === goal.c && cell.row === goal.r);
+  if (at < 0 || to < 0 || at === to) return [] as number[];
+  return pathOnSlots(cells, at, to);
+}
 const ASK_MILES: MileAt[] = [
   { col: 5, row: 14, label: "L14–C06", name: "Coordination", run: 4 },
   { col: 3, row: 15, label: "L15–C04", name: "Integration", run: 4 },
@@ -116,6 +128,8 @@ const SWAP_LOCK = new Set<string>([
   "3,1",
   "4,7",
   "3,12",
+  "4,12",
+  "5,12",
   "5,13",
   ...PATH_LEGS.flatMap((leg) => [`${leg.mile.col},${leg.mile.row}`, ...leg.tiles.map((tile) => `${tile.col},${tile.row}`)]),
 ]);
@@ -130,14 +144,10 @@ const SWAP_POOL: string[] = [
   ...Array.from({ length: 6 }, (_, col) => `${col},8`),
   ...Array.from({ length: 5 }, (_, n) => Array.from({ length: 4 }, (_, i) => `${i + 3},${n + 9}`))
     .flat()
-    .filter((id) => id !== "6,10" && id !== "6,12"),
-  ...Array.from({ length: 4 }, (_, n) => Array.from({ length: 3 }, (_, col) => `${col},${n + 10}`))
-    .flat()
-    .filter((id) => id !== "1,12"),
+    .filter((id) => id !== "6,13"),
+  ...Array.from({ length: 5 }, (_, n) => Array.from({ length: 3 }, (_, col) => `${col},${n + 9}`)).flat(),
   ...Array.from({ length: 3 }, (_, col) => `${col},14`),
-  ...Array.from({ length: 5 }, (_, n) => Array.from({ length: 4 }, (_, i) => `${i + 3},${n + 14}`))
-    .flat()
-    .filter((id) => id !== "6,14" && id !== "6,15"),
+  ...Array.from({ length: 5 }, (_, n) => Array.from({ length: 4 }, (_, i) => `${i + 3},${n + 14}`)).flat(),
 ].filter((id) => !SWAP_LOCK.has(id));
 
 function hubDist(col: number, row: number) {
@@ -176,14 +186,9 @@ function filmFlip(col: number, row: number, now: number) {
 }
 
 function tileRise(col: number, row: number) {
+  if (row >= 9 && row <= 13) return 0;
   if (col === 3 && row === 0) return 0;
   if (col === 6 && row === 0) return 1;
-  if (row >= 9) {
-    const n = (col + row) % 6;
-    if (n === 0) return 1;
-    if (n === 3) return -1;
-    return 0;
-  }
   const n = (col + row * 2) % 3;
   if (n === 0) return 1;
   if (n === 1) return -1;
@@ -602,19 +607,8 @@ export function EntityField({
       setInkShow(false);
       setInkAt(null);
     }
-    const goal = page < 2 ? HUB_HOME : inkAt ?? HUB_DEST;
     const at = hubAtRef.current;
-    if (at.c === goal.c && at.r === goal.r) {
-      setHubTrail([]);
-      return;
-    }
-    const from = field.cells.findIndex((cell) => cell.col === at.c && cell.row === at.r);
-    const to = field.cells.findIndex((cell) => cell.col === goal.c && cell.row === goal.r);
-    if (from < 0 || to < 0 || from === to) {
-      setHubTrail([]);
-      return;
-    }
-    setHubTrail(pathOnSlots(field.cells, from, to));
+    setHubTrail(hubSteps(field.cells, at, page, inkAt));
   }, [page, inkAt, field.cells]);
 
   useEffect(() => {
@@ -859,13 +853,6 @@ export function FieldTiles({
               >
                 <div className="feat-offer-copy is-mod">
                   <span className="feat-mod-code">{mile.label}</span>
-                  <span className="feat-mod-name">
-                    {mile.name.split(/\s+/).map((word) => (
-                      <span key={word} className="feat-mod-word">
-                        {word}
-                      </span>
-                    ))}
-                  </span>
                 </div>
               </div>
             );
@@ -897,6 +884,7 @@ export function FieldTiles({
               style={home}
               data-at={at}
               data-film="1"
+              data-rise={tileRise(cell.col, cell.row) || undefined}
               aria-hidden="true"
               onPointerDown={(event) => {
                 aimInk(event, cell.col, cell.row);

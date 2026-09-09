@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 export function SiteFooter() {
   const pathname = usePathname();
-  if (pathname === "/" || pathname === "/join" || pathname === "/habitat") return null;
+  if (pathname === "/" || pathname === "/join" || pathname === "/habitat" || pathname === "/product") return null;
 
   return (
     <footer className="page flex flex-wrap items-end justify-between gap-6 pb-10 pt-16">

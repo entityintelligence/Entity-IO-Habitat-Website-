@@ -9,7 +9,7 @@ import { PlaceToggle } from "@/components/place";
 export function SiteHeader() {
   const pathname = usePathname();
   const field = isFieldPath(pathname);
-  if (pathname === "/") return null;
+  if (pathname === "/" || pathname === "/product") return null;
 
   return (
     <header className={`fixed top-0 z-30 ${field ? "split-head" : "site-head"}`}>

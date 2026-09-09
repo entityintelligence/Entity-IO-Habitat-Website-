@@ -110,6 +110,17 @@ export const story = {
   join: "Join Entity ICT at the Vanguard",
   plot: "Temporal Projection",
   plotCopy: "Select your business entity's future and press execute critical path.",
+  plotGuide: {
+    why: "The future is at your fingertips",
+    how: "Select a tile  >  Entity ICT unlocks the pathway",
+  },
+  core: "Explore Product Range",
+  coreAside: "Habitat",
+  coreBody: [
+    "Centered around time management and operational health, our core product is a persistent generative software system that perpetually optimises an entire business toward its ideal state.",
+    "Everything within the system is interdependent, so every change propagates and recalibrates across all accessible domains — workflow, resources, information delivery and the live operating surface.",
+    "It is geared to succeed from the inside out: a completely native command environment for the next generation, built around the evolution of artificial intelligence rather than added to it afterwards.",
+  ],
   heroAside: "Entity Digital Twin",
   problem: [
     "When the components of your business fall out of rhythm, you lose time – similar to a clock.",
@@ -207,6 +218,58 @@ export const heroFlip = [
   "Preserve Cognition",
   "Unlock Performance",
 ] as const;
+
+export const range = {
+  hero: "Explore Product Range",
+  aside: "Habitat",
+  enroll: "Enrollment",
+  views: [
+    {
+      code: "01",
+      name: "Visibility",
+      at: "2,0",
+      lines: [
+        "Complete underlying transparency.",
+        "The organisation is ingested and stood up as a live entity — systems, records and structure, bound from the first pass.",
+      ],
+    },
+    {
+      code: "02",
+      name: "Prediction",
+      at: "2,1",
+      lines: [
+        "High-quality predictive capability.",
+        "Historical state, present condition and potential futures — prediction, simulation and critical-path analysis.",
+      ],
+    },
+    {
+      code: "03",
+      name: "Autonomy",
+      at: "1,1",
+      lines: [
+        "High-quality automation capability.",
+        "The face of intelligence in the system. Understands, orchestrates and automates the entity.",
+      ],
+    },
+    {
+      code: "04",
+      name: "Evolution",
+      at: "2,2",
+      lines: [
+        "Immerse yourself in your entity and watch it evolve.",
+        "Unlock capabilities as the entity levels — new functions, depth and practice coming online as the organisation is ready.",
+      ],
+    },
+    {
+      code: "05",
+      name: "Enrollment",
+      at: "1,2",
+      lines: [
+        "We are inviting select businesses to join us on the frontline as Design Partners and future users. Enquire to explore the opportunity, the benefits and whether your business is a fit.",
+      ],
+    },
+  ],
+} as const;
 
 export const ladder = [
   { id: "01", title: "Free access", body: "Low-friction exposure to KIT." },

@@ -54,10 +54,9 @@ export function buildField() {
       for (let col = 0; col <= 6; col += 1) pushCell(cells, col, row, "plot");
       continue;
     }
-    const start = row >= 10 ? 0 : 3;
+    const start = 0;
     for (let col = start; col <= 6; col += 1) {
-      if (col === 6 && (row === 10 || row === 12)) continue;
-      if (col === 1 && row === 12) continue;
+      if (col === 6 && row === 13) continue;
       pushCell(cells, col, row, "plot");
     }
   }
@@ -65,7 +64,6 @@ export function buildField() {
   for (let row = 14; row <= 18; row += 1) {
     const start = row <= 15 ? 0 : 3;
     for (let col = start; col <= 6; col += 1) {
-      if (col === 6 && (row === 14 || row === 15)) continue;
       if (row === 15 && col <= 2) continue;
       pushCell(cells, col, row, "ask");
     }

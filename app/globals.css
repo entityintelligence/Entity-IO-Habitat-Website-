@@ -278,6 +278,13 @@ html[data-theme="light"] .land-site.split::before {
   transition: color 0.22s ease;
 }
 
+button.head-link {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+}
+
 a.head-link:hover,
 .head-link:hover,
 .theme-toggle:hover,
@@ -330,6 +337,22 @@ html:not([data-theme="light"]) .head-mark .feat-epic-face {
   align-items: center;
   min-width: 0;
   gap: 1.15em;
+}
+
+.head-plot {
+  margin: 0;
+  min-width: 0;
+  color: var(--fg-mute);
+  font-family: var(--font-plex), "IBM Plex Sans KR", "Helvetica Neue", sans-serif;
+  font-size: var(--type-title);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  line-height: 1.35;
+  font-synthesis: none;
+}
+
+.head-plot span {
+  display: block;
 }
 
 .head-brand-slash {
@@ -638,6 +661,15 @@ html:not([data-theme="light"]) .land-head .head-sep {
   display: block;
   overflow: hidden;
   padding-top: calc(14.15rem - 0.5in);
+}
+
+.split-stage.land.land-plot-stage {
+  overflow: clip;
+  overflow-clip-margin: 2.5rem;
+}
+
+.land-site[data-page="2"] .split-stage.land.land-plot-stage {
+  overflow: visible;
 }
 
 .split-stage.land.land-feat {
@@ -1001,6 +1033,11 @@ html[data-theme="light"] .feat-tile[data-film="1"][data-rise="-1"] {
   transform: translate(-0.2rem, -0.22rem) translateZ(36px);
 }
 
+.land-plot-hold .feat-tile[data-epic="1"],
+.land-site[data-page="2"] .feat-tile[data-epic="1"] {
+  transform: none;
+}
+
 .land-plot-stage .land-spec {
   height: calc(5 * var(--feat-tile) + 4 * var(--feat-g));
   grid-template-rows: repeat(5, var(--feat-tile));
@@ -1173,26 +1210,6 @@ html[data-theme="light"] .feat-tile[data-film="1"][data-rise="-1"] {
   opacity: 1;
 }
 
-.feat-mod-name {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: #fff;
-  opacity: 1;
-  font-size: calc(var(--type-title) - 1px);
-  font-weight: 400;
-  letter-spacing: 0.06em;
-  line-height: 1.15;
-}
-
-.feat-mod-word {
-  display: block;
-}
-
-html[data-theme="light"] .feat-mod-name {
-  color: #111;
-}
-
 .feat-path-mark {
   --path-stroke: 1.5px;
   position: absolute;
@@ -1314,6 +1331,108 @@ html:not([data-theme="light"]) .feat-epic-face {
 .land-site[data-page="2"] .land-spec-hold.land-ask-hold,
 .land-site[data-page="3"] .land-spec-hold.land-ask-hold {
   pointer-events: auto;
+}
+
+.land-plot-hold .feat-tile[data-film="1"]:not([data-epic]):not([data-ink]) {
+  z-index: 2;
+  transform: none;
+  cursor: pointer;
+  transition:
+    box-shadow 0.22s ease,
+    background 0.22s ease,
+    opacity 0.22s ease;
+}
+
+.land-plot-hold .feat-tile[data-epic="1"] {
+  justify-self: start;
+  z-index: 9;
+  width: var(--feat-tile);
+  height: var(--feat-tile);
+  min-height: var(--feat-tile);
+  overflow: visible;
+}
+
+.land-plot-hold .feat-tile[data-epic="1"][data-open="1"] {
+  align-self: center;
+  width: calc(3 * var(--feat-tile) + 2 * var(--feat-g));
+  height: calc(var(--feat-tile) - 20mm);
+  min-height: calc(var(--feat-tile) - 20mm);
+}
+
+.land-plot-hold .feat-epic-arm {
+  inset: auto;
+  top: 50%;
+  right: auto;
+  bottom: auto;
+  left: calc(0.3 * var(--feat-tile));
+  width: calc(0.4 * var(--feat-tile));
+  height: calc(0.4 * var(--feat-tile));
+  margin: 0;
+  transform: translateY(-50%);
+}
+
+.land-plot-hold .feat-tile[data-open="1"] .feat-epic-arm.is-right {
+  left: calc(0.3 * var(--feat-tile) + 2 * (var(--feat-tile) + var(--feat-g)));
+}
+
+.plot-open-copy {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0 calc(0.55 * var(--feat-tile));
+  color: var(--fg);
+  font-family: var(--font-plex), "IBM Plex Sans KR", "Helvetica Neue", sans-serif;
+  font-size: var(--type-title);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  word-spacing: 0.72em;
+  line-height: 1.4;
+  text-align: center;
+  opacity: 1;
+  pointer-events: none;
+}
+
+.plot-open-copy span {
+  display: block;
+  margin-top: 0.32rem;
+  color: color-mix(in srgb, var(--fg) 48%, transparent);
+  font-size: calc(var(--type-title) - 1px);
+  letter-spacing: 0.04em;
+  word-spacing: 0.12em;
+}
+
+.land-plot-hold .feat-tile[data-film="1"]:not([data-epic]):not([data-ink]):hover,
+.land-site[data-page="2"] .land-plot-hold .feat-tile[data-film="1"]:not([data-epic]):not([data-ink]):hover,
+.land-site[data-page="2"] .land-plot-hold .feat-tile[data-film="1"][data-rise]:not([data-epic]):not([data-ink]):not([data-mile]):not([data-path]):hover {
+  z-index: 6;
+  opacity: 0.95;
+  --tile-glow: color-mix(in srgb, #cfcfcf 55%, transparent);
+  --tile-glow-size: 2.6rem;
+  --tile-glow-inset: -0.45rem;
+  --tile-drop: 0.45rem 0.62rem 1.25rem color-mix(in srgb, #9a9a9a 22%, transparent);
+}
+
+html[data-theme="light"] .land-plot-hold .feat-tile[data-film="1"]:not([data-epic]):not([data-ink]):hover,
+html[data-theme="light"] .land-site[data-page="2"] .land-plot-hold .feat-tile[data-film="1"]:not([data-epic]):not([data-ink]):hover {
+  --tile-glow: color-mix(in srgb, #b5b5b5 42%, transparent);
+  --tile-drop: 0.45rem 0.62rem 1.25rem color-mix(in srgb, #8d8d8d 16%, transparent);
+}
+
+.land-plot-hold .feat-tile[data-film="1"][data-rise="1"]:not([data-epic]):not([data-ink]):not([data-mile]):not([data-path]),
+.land-plot-hold .feat-tile[data-film="1"][data-rise="-1"]:not([data-epic]):not([data-ink]):not([data-mile]):not([data-path]) {
+  opacity: 0.28;
+  --tile-drop: 0.4rem 0.58rem 1.2rem color-mix(in srgb, #000 42%, transparent);
+  --tile-lift: -0.22rem -0.28rem 0.7rem color-mix(in srgb, #fff 7%, transparent);
+}
+
+.land-spec.land-ask-field[data-offer="1"] .feat-tile:not([data-epic]):not([data-ink]):not([data-mile]):not([data-path]),
+.land-spec.land-ask-field[data-offer="1"] .feat-gap {
+  transition: none;
 }
 
 .feat-tile[data-ink="1"],
@@ -1749,7 +1868,8 @@ html[data-theme="light"] .land-spec {
 
 .land-hero .land-hero-live,
 .land-hero-hold .land-hero-live,
-.land-story-head .land-hero-live {
+.land-story-head .land-hero-live,
+.land-core-kicker .land-hero-live {
   display: inline;
   background: none;
   color: #111;
@@ -1759,7 +1879,8 @@ html[data-theme="light"] .land-spec {
 
 html:not([data-theme="light"]) .land-hero .land-hero-live,
 html:not([data-theme="light"]) .land-hero-hold .land-hero-live,
-html:not([data-theme="light"]) .land-story-head .land-hero-live {
+html:not([data-theme="light"]) .land-story-head .land-hero-live,
+html:not([data-theme="light"]) .land-core-kicker .land-hero-live {
   color: #fff;
   -webkit-text-fill-color: #fff;
 }
@@ -1770,7 +1891,8 @@ html:not([data-theme="light"]) .land-story-head .land-hero-live {
   letter-spacing: 0.14em;
 }
 
-.land-hero-hold .land-hero-slash.land-hero-live {
+.land-hero-hold .land-hero-slash.land-hero-live,
+.land-core-kicker .land-hero-slash.land-hero-live {
   display: inline-block;
 }
 
@@ -1847,15 +1969,15 @@ html:not([data-theme="light"]) .land-story-head .land-hero-live {
   font-size: var(--type-title);
   letter-spacing: 0.18em;
   line-height: 1.5;
-  text-align: justify;
-  text-align-last: justify;
+  text-align: left;
+  text-align-last: auto;
 }
 
 .land-story .land-mid > span {
   width: 100%;
   margin-top: 1.25rem;
-  text-align: justify;
-  text-align-last: justify;
+  text-align: left;
+  text-align-last: auto;
 }
 
 .land-story .land-mid::after {
@@ -1868,6 +1990,183 @@ html:not([data-theme="light"]) .land-story-head .land-hero-live {
   margin-top: 3rem;
   pointer-events: none;
   background: color-mix(in srgb, var(--fg) 16%, transparent);
+}
+
+.land-story .land-mid:has(+ .land-core-kicker)::after {
+  content: none;
+}
+
+.land-core-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7em;
+  margin: calc(1.25rem + 0.25in) 0 0;
+  border: 0;
+  background: none;
+  padding: 0;
+  font-family: var(--font-plex), "IBM Plex Sans KR", "Helvetica Neue", sans-serif;
+  font-size: var(--type-title);
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  line-height: 1.5;
+  font-synthesis: none;
+  white-space: nowrap;
+  text-decoration: none;
+  color: var(--fg-mute);
+  cursor: pointer;
+}
+
+.land-core-kicker .land-hero-live {
+  font-size: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+}
+
+a.land-core-kicker:hover .land-hero-live,
+a.land-core-kicker:hover .land-ask-go-mark {
+  color: #6226ff;
+  -webkit-text-fill-color: #6226ff;
+}
+
+.land-range-mods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.5rem;
+  width: 100%;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--fg-mute);
+  font-family: var(--font-plex), "IBM Plex Sans KR", "Helvetica Neue", sans-serif;
+  font-size: var(--type-title);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  line-height: 1.45;
+}
+
+.range-page .split-stage.land.land-story {
+  display: block;
+  padding: 0;
+  overflow: hidden;
+}
+
+.range-cluster {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 3;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--feat-g);
+  transform: translate(-50%, calc(var(--feat-tile) / -2));
+}
+
+.range-page .land-story-col {
+  position: relative;
+  top: auto;
+  left: auto;
+  right: auto;
+  z-index: 5;
+  display: flex;
+  width: max-content;
+  max-width: min(calc(38rem - 1in), calc(100vw - var(--feat-tile) - var(--feat-g) - 3rem));
+  height: auto;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  margin: 0;
+  pointer-events: none;
+  transform: translateX(0.5in);
+}
+
+.range-page .land-story-head {
+  visibility: visible;
+  display: flex;
+  align-items: center;
+  width: auto;
+  max-width: 100%;
+  height: var(--feat-tile);
+  margin: 0;
+  white-space: nowrap;
+}
+
+.range-page .land-story-body {
+  position: absolute;
+  top: calc(var(--feat-tile) + 0.15rem);
+  left: 0;
+  display: block;
+  width: min(calc(38rem - 1in), calc(100vw - var(--feat-tile) - var(--feat-g) - 3rem));
+  margin: 0;
+  padding: 0;
+  animation: land-spec-in 0.42s ease both;
+}
+
+.range-page .land-story-copy {
+  max-width: none;
+  width: 100%;
+  pointer-events: auto;
+}
+
+.range-page .land-story .land-mid {
+  max-width: none;
+  width: 100%;
+}
+
+.range-toggle {
+  margin: 0;
+  pointer-events: auto;
+}
+
+.range-toggle .land-ask-go-mark {
+  animation: none;
+}
+
+.range-toggle .land-ask-go-mark svg {
+  transform: none;
+  transform-origin: 50% 50%;
+  transition: transform 0.28s ease;
+}
+
+.range-toggle[aria-expanded="true"] .land-ask-go-mark svg {
+  transform: rotate(180deg);
+}
+
+.range-toggle:hover .land-hero-live,
+.range-toggle:hover .land-ask-go-mark {
+  color: #6226ff;
+  -webkit-text-fill-color: #6226ff;
+}
+
+.range-hold {
+  position: relative;
+  left: auto;
+  top: auto;
+  z-index: 3;
+  flex: none;
+  width: var(--feat-tile);
+  margin: 0;
+}
+
+.range-hold .feat-tile {
+  width: var(--feat-tile);
+  height: var(--feat-tile);
+}
+
+.land-range-cats {
+  margin-top: 1.5rem;
+}
+
+.land-story .land-core-mid {
+  margin-top: 0;
+}
+
+.land-story .land-core-mid::after {
+  content: none;
+}
+
+html:not([data-theme="light"]) .land-core-kicker .land-hero-live {
+  color: #fff;
+  -webkit-text-fill-color: #fff;
 }
 
 .land-story-lede {

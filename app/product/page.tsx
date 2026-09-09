@@ -1,5 +1,10 @@
-import { redirect } from "next/navigation";
+import { ProductRange } from "@/components/product-range";
 
-export default function ProductRedirect() {
-  redirect("/");
+export const metadata = {
+  title: "Product Range — KIT",
+  description: "Explore the KIT product range: core entity, native capability, and the operating surface.",
+};
+
+export default function ProductPage() {
+  return <ProductRange />;
 }

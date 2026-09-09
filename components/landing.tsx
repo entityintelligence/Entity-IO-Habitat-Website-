@@ -91,6 +91,14 @@ function StoryPage({
                 <span key={line}>{line}</span>
               ))}
             </p>
+            <Link href="/product" className="land-core-kicker">
+              <span className="land-hero-live">{story.core}</span>
+              <span className="land-ask-go-mark" aria-hidden="true">
+                <svg viewBox="0 0 12 12">
+                  <path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="0.85" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+            </Link>
           </div>
         </div>
       </div>
@@ -121,7 +129,7 @@ function LandingHead({
   onHome: () => void;
   onJoin: () => void;
 }) {
-  const { offer, kitOn, holdKit, returnOffer } = useField();
+  const { offer, kitOn, holdKit, returnOffer, page } = useField();
   return (
     <header className="land-head">
       <div className="head-bar">
@@ -138,7 +146,12 @@ function LandingHead({
             HABITAT<span className="head-brand-slash">/</span>ENTITY ICT
           </Link>
           <span className="head-sep" aria-hidden="true" />
-          {offer ? (
+          {page === 2 ? (
+            <p className="head-plot">
+              {story.plotGuide.why}
+              <span>{story.plotGuide.how}</span>
+            </p>
+          ) : offer ? (
             <TimeRead />
           ) : (
             <button
@@ -186,7 +199,7 @@ function LandingHead({
               onJoin();
             }}
           >
-            Product Demonstration
+            Enrollment
           </Link>
           <span className="head-sep" aria-hidden="true" />
           <PlaceToggle />
@@ -298,6 +311,9 @@ export function Landing() {
 
     paint(embla.selectedScrollSnap());
     place();
+    if (new URLSearchParams(window.location.search).has("enroll")) {
+      goRef.current(LAST);
+    }
     embla.on("scroll", sync);
     embla.on("select", sync);
     embla.on("reInit", sync);

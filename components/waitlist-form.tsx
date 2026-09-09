@@ -119,7 +119,7 @@ export function WaitlistForm({ tone = "paper" }: { tone?: "paper" | "field" }) {
         {status === "error" ? <p className="land-ask-err">{message}</p> : null}
         <button type="submit" disabled={status === "submitting"} className="land-ask-row land-ask-go">
           <span className="land-ask-key">
-            {status === "submitting" ? "Sending" : "Product Demonstration"}
+            {status === "submitting" ? "Sending" : "Enrollment"}
             {status !== "submitting" ? (
               <span className="land-ask-go-mark" aria-hidden="true">
                 <svg viewBox="0 0 12 12">
@@ -171,7 +171,7 @@ export function WaitlistForm({ tone = "paper" }: { tone?: "paper" | "field" }) {
       </fieldset>
       {status === "error" ? <p className="mono">{message}</p> : null}
       <button type="submit" disabled={status === "submitting"} className="funnel-cta">
-        {status === "submitting" ? "Sending" : "Product Demonstration"}
+        {status === "submitting" ? "Sending" : "Enrollment"}
       </button>
     </form>
   );
