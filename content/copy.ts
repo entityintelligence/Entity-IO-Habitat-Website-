@@ -112,14 +112,15 @@ export const story = {
   plotCopy: "Select your business entity's future and press execute critical path.",
   plotGuide: {
     why: "The future is at your fingertips",
-    how: "Select a tile  >  Entity ICT unlocks the pathway",
+    how: "Select the desired system state  >  Entity ICT unlocks the pathway",
   },
   core: "Explore Product Range",
+  coreTitle: "The Core Product",
   coreAside: "Habitat",
   coreBody: [
     "Centered around time management and operational health, our core product is a persistent generative software system that perpetually optimises an entire business toward its ideal state.",
-    "Everything within the system is interdependent, so every change propagates and recalibrates across all accessible domains — workflow, resources, information delivery and the live operating surface.",
-    "It is geared to succeed from the inside out: a completely native command environment for the next generation, built around the evolution of artificial intelligence rather than added to it afterwards.",
+    "Seven Native Capabilities",
+    "At its core, Entity io holds your business as one coherent, evolving system — connecting its people, resources, projects, information and activity to understand the operation as a whole and continuously move it toward its highest achievable state.",
   ],
   heroAside: "Entity Digital Twin",
   problem: [
@@ -134,7 +135,7 @@ export const story = {
       line: "Complete underlying transparency.",
     },
     {
-      label: "Prediction",
+      label: "Temporal",
       line: "High-quality predictive capability.",
     },
     {
@@ -219,51 +220,106 @@ export const heroFlip = [
   "Unlock Performance",
 ] as const;
 
+export const rangeNumerals = ["I", "II", "III", "IV", "V", "VI", "VII"] as const;
+
 export const range = {
   hero: "Explore Product Range",
   aside: "Habitat",
-  enroll: "Enrollment",
+  enroll: "Pilot Product",
+  explore: "Explore Product",
+  habitat: {
+    name: "Welcome to Habitat 01",
+    aside: "A certified asset, holding the digital identity of your business operation within one coherent command environment — shaped to funnel and push an entity through its evolutionary states.",
+    lines: [
+      "As your business evolves, it moves through a continuous sequence of states. Within Habitat 01, these states are mapped across time and space, revealing what needs to happen, when, where and in what order to move the entity toward its objective.",
+      "The mosaic offers a glimpse into this process. Each tile represents a possible state of the business, providing a visual point of entry into the journey toward a selected destination.",
+    ],
+  },
+  engineering: {
+    name: "Technical Interpretation",
+    lines: [
+      "A persistent, self-regulating software system that identifies and generates its own optimal state within specific contextual parameters.",
+      "The native elements of the environment are centered around time management, operational health and frontier intelligence technology.",
+      "Effective Implementation: Requires a large volume of data from operationally complex subjects.",
+      "The product is engineered through seven influential fields. Each field is a constitutive discipline of Habitat 01 — the structure through which the environment reads an entity, predicts its next state and aligns the operation toward an objective.",
+      "Temporal · Spatial · Connectivity · Evolution · Cognition · Causality · Adaptation",
+    ],
+  },
   views: [
     {
       code: "01",
-      name: "Visibility",
+      name: "Temporal",
       at: "2,0",
+      aside: "See your operation through time.",
       lines: [
-        "Complete underlying transparency.",
-        "The organisation is ingested and stood up as a live entity — systems, records and structure, bound from the first pass.",
+        "Entity io connects what has happened, what is happening and what is likely to happen next. Projects, schedules, resources and dependencies exist on a common timeline, allowing critical paths to emerge, requirements to be anticipated and future activity to adjust as conditions change.",
+        "Project planning · Scheduling · Critical paths · Forecasting · Scenario modelling",
       ],
     },
     {
       code: "02",
-      name: "Prediction",
+      name: "Spatial",
       at: "2,1",
+      aside: "Know where everything is and where it needs to be.",
       lines: [
-        "High-quality predictive capability.",
-        "Historical state, present condition and potential futures — prediction, simulation and critical-path analysis.",
+        "People, assets, inventory, resources and activity are mapped across the physical, digital and organisational structure of your business — creating visibility across sites, teams and operational environments.",
+        "Asset management · Logistics · Inventory · Workforce deployment · Operational mapping",
       ],
     },
     {
       code: "03",
-      name: "Autonomy",
+      name: "Connectivity",
       at: "1,1",
+      aside: "Bring the entire operation into one coherent state.",
       lines: [
-        "High-quality automation capability.",
-        "The face of intelligence in the system. Understands, orchestrates and automates the entity.",
+        "Information, people, processes, resources, projects and systems are connected through their relationships and dependencies. Changes no longer disappear into silos — the wider operation remains connected and visible.",
+        "ERP · Data integration · Dependency mapping · Workflow coordination · Cross-functional visibility",
       ],
     },
     {
       code: "04",
       name: "Evolution",
       at: "2,2",
+      aside: "Build a more capable operation.",
       lines: [
-        "Immerse yourself in your entity and watch it evolve.",
-        "Unlock capabilities as the entity levels — new functions, depth and practice coming online as the organisation is ready.",
+        "Entity io understands the business as something that continuously develops. Influenced by the Acatech 4.0 Maturity Index, it identifies capability gaps, maps maturity and creates pathways that push the entity from the way it works today toward its optimal state.",
+        "Maturity modelling · Capability development · Process improvement · Transformation planning · Strategic roadmapping · Unlocking scaling thresholds",
       ],
     },
     {
       code: "05",
-      name: "Enrollment",
+      name: "Cognition",
       at: "1,2",
+      aside: "Turn operational complexity into understanding.",
+      lines: [
+        "Entity io continuously interprets information across the business, identifying what matters and delivering it within context. Instead of searching, reconciling and interpreting information across multiple systems, your people receive the understanding they need to make better decisions.",
+        "Operational intelligence · Contextual information delivery · Pattern recognition · Decision support · Organisational knowledge",
+      ],
+    },
+    {
+      code: "06",
+      name: "Causality",
+      at: "2,3",
+      aside: "Understand the consequence of change.",
+      lines: [
+        "Every decision has downstream effects. Entity io models how changes propagate across projects, resources, costs, schedules, capacity and objectives — revealing consequences that would otherwise emerge after the fact.",
+        "Impact analysis · Dependency modelling · Scenario simulation · Constraint analysis · Change propagation",
+      ],
+    },
+    {
+      code: "07",
+      name: "Adaptation",
+      at: "1,3",
+      aside: "Keep the operation aligned as reality changes.",
+      lines: [
+        "Plans rarely survive unchanged. As work moves, resources change, new information arrives or priorities shift, Entity io recalibrates the wider operational state — coordinating what needs to change and maintaining alignment with your objectives. Centered around operational health, it perpetually optimises the business toward its ideal state.",
+        "Automation · Resource management · Workflow orchestration · Dynamic replanning · Exception management · Objective alignment",
+      ],
+    },
+    {
+      code: "08",
+      name: "Enrollment",
+      at: "1,4",
       lines: [
         "We are inviting select businesses to join us on the frontline as Design Partners and future users. Enquire to explore the opportunity, the benefits and whether your business is a fit.",
       ],

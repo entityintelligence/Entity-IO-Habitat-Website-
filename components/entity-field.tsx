@@ -14,6 +14,7 @@ import {
   type ReactNode,
 } from "react";
 import type { EmblaCarouselType } from "embla-carousel";
+import { RangeCarousel, RANGE_DISPLAY, type RangeRead } from "@/components/range-carousel";
 
 const STEP_MS = 280;
 const KIT_MARK_MS = 1150;
@@ -100,14 +101,14 @@ function isHub(col: number, row: number, hop = HUB_HOME) {
 function isInkMark(col: number, row: number, at: Seat | null) {
   return !!at && col === at.c && row === at.r;
 }
-function hubGoal(page: number, inkAt: Seat | null): Seat {
+function hubGoal(page: number, inkAt: Seat | null, dest = HUB_DEST): Seat {
   if (page < 2) return HUB_HOME;
   if (inkAt) return inkAt;
-  return HUB_DEST;
+  return dest;
 }
-function hubSteps(cells: FieldCell[], from: Seat, page: number, inkAt: Seat | null) {
+function hubSteps(cells: FieldCell[], from: Seat, page: number, inkAt: Seat | null, dest = HUB_DEST) {
   const at = cells.findIndex((cell) => cell.col === from.c && cell.row === from.r);
-  const goal = hubGoal(page, inkAt);
+  const goal = hubGoal(page, inkAt, dest);
   const to = cells.findIndex((cell) => cell.col === goal.c && cell.row === goal.r);
   if (at < 0 || to < 0 || at === to) return [] as number[];
   return pathOnSlots(cells, at, to);
@@ -238,9 +239,11 @@ type FieldCtx = {
   boardSeat: Record<string, { c: number; r: number }>;
   webOn: boolean;
   hubAt: { c: number; r: number };
+  hubWalk: boolean;
   inkShow: boolean;
   inkAt: Seat | null;
   pickInk: (col: number, row: number) => void;
+  restHub: () => void;
   toggleWeb: () => void;
   endFilm: (played?: boolean) => void;
   returnOffer: () => void;
@@ -256,12 +259,24 @@ export function useField() {
 
 export function EntityField({
   embla,
+  page: pageLock,
+  extraCells,
+  hubSeat,
+  hubStart,
   children,
 }: {
-  embla: EmblaCarouselType | undefined;
+  embla?: EmblaCarouselType;
+  page?: number;
+  extraCells?: FieldCell[];
+  hubSeat?: Seat;
+  hubStart?: Seat;
   children: ReactNode;
 }) {
-  const field = useMemo(() => buildField(), []);
+  const field = useMemo(() => {
+    const next = buildField();
+    if (!extraCells?.length) return next;
+    return { ...next, cells: [...next.cells, ...extraCells] };
+  }, [extraCells]);
   const [entityAt, setEntityAt] = useState(field.topHome);
   const [goal, setGoal] = useState<number | null>(null);
   const [trail, setTrail] = useState<number[]>([]);
@@ -273,7 +288,7 @@ export function EntityField({
   const [watchPrev, setWatchPrev] = useState<string | null>(null);
   const [watchPrevMs, setWatchPrevMs] = useState<number | null>(null);
   const [watchRun, setWatchRun] = useState(false);
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(pageLock ?? 0);
   const [film, setFilm] = useState(true);
   const [filmAt, setFilmAt] = useState(0);
   const [offer, setOffer] = useState(true);
@@ -284,7 +299,8 @@ export function EntityField({
   const [offerPath, setOfferPath] = useState<PathAt[] | null>(null);
   const [mileShow, setMileShow] = useState<string[]>([]);
   const [webOn, setWebOn] = useState(false);
-  const [hubAt, setHubAt] = useState(HUB_HOME);
+  const park = hubSeat ?? HUB_DEST;
+  const [hubAt, setHubAt] = useState(hubStart ?? (pageLock != null && pageLock >= 2 ? park : HUB_HOME));
   const [hubTrail, setHubTrail] = useState<number[]>([]);
   const [inkShow, setInkShow] = useState(false);
   const [inkAt, setInkAt] = useState<Seat | null>(null);
@@ -385,6 +401,14 @@ export function EntityField({
     setInkAt({ c: col, r: row });
     setInkShow(true);
   }, [page]);
+
+  const restHub = useCallback(() => {
+    setWebOn(false);
+    setInkShow(false);
+    setInkAt(null);
+    setHubTrail([]);
+    setHubAt(park);
+  }, [park]);
 
   const returnOffer = useCallback(() => {
     autoRun.current = false;
@@ -581,6 +605,10 @@ export function EntityField({
   }, []);
 
   useEffect(() => {
+    if (pageLock != null) {
+      setPage(pageLock);
+      return;
+    }
     if (!embla) return;
     const onSelect = () => {
       const atPage = embla.selectedScrollSnap();
@@ -600,7 +628,7 @@ export function EntityField({
     return () => {
       embla.off("select", onSelect);
     };
-  }, [embla]);
+  }, [embla, pageLock]);
 
   useEffect(() => {
     if (page < 2) {
@@ -608,8 +636,12 @@ export function EntityField({
       setInkAt(null);
     }
     const at = hubAtRef.current;
-    setHubTrail(hubSteps(field.cells, at, page, inkAt));
-  }, [page, inkAt, field.cells]);
+    if (!inkAt && hubStart && at.c === hubStart.c && at.r === hubStart.r) {
+      setHubTrail([]);
+      return;
+    }
+    setHubTrail(hubSteps(field.cells, at, page, inkAt, park));
+  }, [page, inkAt, field.cells, park, hubStart]);
 
   useEffect(() => {
     if (!inkShow || !inkAt) return;
@@ -668,14 +700,16 @@ export function EntityField({
       boardSeat,
       webOn,
       hubAt,
+      hubWalk: hubTrail.length > 0,
       inkShow,
       inkAt,
       pickInk,
+      restHub,
       toggleWeb,
       endFilm,
       returnOffer,
     }),
-    [field.cells, entityAt, goal, trail, wave, fore, go, jump, tap, open, kitOn, holdKit, route, watchMs, watchPrev, watchPrevMs, watchRun, page, film, filmAt, offer, offerPhase, offerLine, offerMorph, offerWeb, offerPath, mileShow, boardFlip, boardShift, boardSeat, webOn, hubAt, inkShow, inkAt, pickInk, toggleWeb, endFilm, returnOffer],
+    [field.cells, entityAt, goal, trail, wave, fore, go, jump, tap, open, kitOn, holdKit, route, watchMs, watchPrev, watchPrevMs, watchRun, page, film, filmAt, offer, offerPhase, offerLine, offerMorph, offerWeb, offerPath, mileShow, boardFlip, boardShift, boardSeat, webOn, hubAt, hubTrail.length, inkShow, inkAt, pickInk, restHub, toggleWeb, endFilm, returnOffer],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
@@ -727,22 +761,175 @@ export function FieldTiles({
   zones,
   className,
   waveMark,
+  hideRows,
+  loneEpic,
+  carouselSeat,
+  onView,
+  onCover,
+  showCells,
 }: {
   zones: FieldZone[];
   className: string;
   waveMark?: boolean;
+  hideRows?: number[];
+  loneEpic?: boolean;
+  carouselSeat?: Seat;
+  onView?: (view: RangeRead | null) => void;
+  onCover?: (on: boolean) => void;
+  showCells?: string[];
 }) {
-  const { cells, entityAt, goal, trail, wave, fore, setFore, go, jump, tap, open, kitOn, route, page, film, filmAt, offer, offerPhase, offerPath, mileShow, boardShift, boardSeat, webOn, hubAt, inkShow, inkAt, pickInk, toggleWeb } = useField();
+  const { cells, entityAt, goal, trail, wave, fore, setFore, go, jump, tap, open, kitOn, route, page, film, filmAt, offer, offerPhase, offerPath, mileShow, boardShift, boardSeat, webOn, hubAt, hubWalk, inkShow, inkAt, pickInk, restHub, toggleWeb } = useField();
   const lastTap = useRef<{ t: number; i: number } | null>(null);
+  const onViewRef = useRef(onView);
+  onViewRef.current = onView;
+  const onCoverRef = useRef(onCover);
+  onCoverRef.current = onCover;
+  const [boardOn, setBoardOn] = useState(!loneEpic);
+  const [rangeRead, setRangeRead] = useState<RangeRead | null>(carouselSeat ? "habitat" : null);
+  const [waveAt, setWaveAt] = useState<number | "done" | null>(null);
+  const [waveDir, setWaveDir] = useState<"in" | "out" | null>(null);
+  const [coverOn, setCoverOn] = useState(false);
+  const [play, setPlay] = useState(false);
+  const [hubReady, setHubReady] = useState(false);
+  const [away, setAway] = useState(false);
+  const [docked, setDocked] = useState(false);
+  const habitatOn = Boolean(carouselSeat && coverOn);
+  const reelFlat = Boolean(carouselSeat && play && rangeRead === "habitat");
+  const hubOnCarousel = Boolean(carouselSeat && hubAt.c === carouselSeat.c && hubAt.r === carouselSeat.r);
+  const boardOut = docked || hubOnCarousel;
+  const coverRef = useRef(false);
+  const simRef = useRef(false);
+  const waveAtRef = useRef<number | "done" | null>(null);
+  coverRef.current = coverOn;
+  waveAtRef.current = waveAt;
+  const takeView = useCallback((next: RangeRead | null) => {
+    setRangeRead(next);
+  }, []);
+  const closeLone = () => {
+    restHub();
+    setBoardOn(false);
+  };
+
+  useEffect(() => {
+    if (!carouselSeat) return;
+    let cancel = false;
+    const wait = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
+    const publish = (next: RangeRead | null) => onViewRef.current?.(next);
+    const cover = (on: boolean) => {
+      coverRef.current = on;
+      setCoverOn(on);
+      onCoverRef.current?.(on);
+    };
+    const finishOut = (next: RangeRead | null) => {
+      setPlay(false);
+      cover(false);
+      setWaveAt(null);
+      setWaveDir(null);
+      setHubReady(false);
+      publish(next);
+    };
+    const outOrder = (at: number | "done" | null) => {
+      if (at === "done" || at === 0) return [0, 1, 2];
+      if (at === 1) return [1, 2];
+      if (at === 2) return [2];
+      return [];
+    };
+
+    if (rangeRead === "habitat") {
+      setBoardOn(true);
+      if (!play) {
+        simRef.current = false;
+        cover(false);
+        setAway(false);
+        setHubReady(false);
+        setWaveDir(null);
+        setWaveAt(null);
+        publish("habitat");
+        return;
+      }
+      if (simRef.current) {
+        setHubReady(true);
+        publish("habitat");
+        return;
+      }
+      cover(true);
+      setHubReady(false);
+      setWaveDir("in");
+      setWaveAt(null);
+      publish("habitat");
+      void (async () => {
+        await wait(80);
+        for (const col of [2, 1, 0]) {
+          if (cancel) return;
+          setWaveAt(col);
+          await wait(450);
+        }
+        if (cancel) return;
+        setWaveAt("done");
+        setHubReady(true);
+      })();
+      return () => {
+        cancel = true;
+      };
+    }
+
+    restHub();
+    setHubReady(false);
+    if (!coverRef.current) {
+      publish(rangeRead);
+      return;
+    }
+
+    setWaveDir("out");
+    const order = outOrder(waveAtRef.current);
+    void (async () => {
+      if (order.length === 0) {
+        if (!cancel) finishOut(rangeRead);
+        return;
+      }
+      await wait(80);
+      for (const col of order) {
+        if (cancel) return;
+        setWaveAt(col);
+        await wait(450);
+      }
+      if (cancel) return;
+      finishOut(rangeRead);
+    })();
+    return () => {
+      cancel = true;
+    };
+  }, [carouselSeat, rangeRead, play, restHub]);
+  useEffect(() => {
+    if (!carouselSeat || !play) return;
+    const here = hubAt.c === carouselSeat.c && hubAt.r === carouselSeat.r;
+    if (!here) {
+      setAway(true);
+      return;
+    }
+    if (!away || hubWalk) return;
+    const home = !inkAt || (inkAt.c === carouselSeat.c && inkAt.r === carouselSeat.r);
+    if (home) setPlay(false);
+  }, [away, carouselSeat, hubAt, hubWalk, inkAt, play]);
+  useEffect(() => {
+    if (hubOnCarousel) setDocked(true);
+  }, [hubOnCarousel]);
   const aimInk = (event: { button: number; preventDefault: () => void; stopPropagation: () => void }, col: number, row: number) => {
-    if (page < 2 || event.button !== 0) return false;
+    if (!boardOn || page < 2 || event.button !== 0) return false;
+    if (carouselSeat && (rangeRead !== "habitat" || !hubReady)) return false;
     event.preventDefault();
     event.stopPropagation();
     pickInk(col, row);
     return true;
   };
+  const sendHub = () => {
+    if (!carouselSeat) return;
+    pickInk(carouselSeat.c, carouselSeat.r);
+  };
   const openAt = (cell: FieldCell) => cellOpen(cell, kitOn);
-  const zone = cells.map((cell, index) => ({ cell, index })).filter((item) => zones.includes(item.cell.zone));
+  const zone = cells
+    .map((cell, index) => ({ cell, index }))
+    .filter((item) => zones.includes(item.cell.zone) && !hideRows?.includes(item.cell.row));
   const minRow = zone.reduce((min, item) => Math.min(min, item.cell.row), Number.POSITIVE_INFINITY);
   const beating = goal !== null || trail.length > 0;
   const beatAt = new Map(beating ? route.map((index, step) => [index, step + 1]) : []);
@@ -753,10 +940,17 @@ export function FieldTiles({
       role="grid"
       aria-label="Entity"
       data-wave={waveMark && wave ? "1" : undefined}
+      data-habitat={habitatOn ? "1" : undefined}
+      data-armed={habitatOn && hubReady && rangeRead === "habitat" ? "1" : undefined}
+      data-wave-dir={waveDir ?? undefined}
+      data-wave-at={waveAt === null ? undefined : String(waveAt)}
       data-film={film ? "1" : undefined}
       data-offer={offer ? "1" : undefined}
       data-offer-phase={offer ? offerPhase : undefined}
       data-web={webOn ? "1" : undefined}
+      data-board={boardOn ? "1" : undefined}
+      data-range={carouselSeat ? "1" : undefined}
+      data-dock={carouselSeat && boardOut ? "1" : undefined}
       onMouseDown={(event) => event.stopPropagation()}
       onTouchStart={(event) => event.stopPropagation()}
       onPointerDown={(event) => event.stopPropagation()}
@@ -788,8 +982,10 @@ export function FieldTiles({
           gridColumn: cell.col + 1,
           gridRow: Number.isFinite(minRow) ? cell.row - minRow + 1 : 1,
           ["--push" as string]: hubDist(cell.col, cell.row),
+          ["--col" as string]: cell.col,
         };
-        if (isHub(cell.col, cell.row, hubAt)) {
+        if (carouselSeat && cell.col <= 2 && !coverOn && !showCells?.includes(`${cell.col},${cell.row}`) && !isHub(cell.col, cell.row, hubAt)) return null;
+        if (isHub(cell.col, cell.row, hubAt) && (!carouselSeat || !hubOnCarousel)) {
           const overInk = inkShow && isInkMark(cell.col, cell.row, inkAt);
           return (
             <button
@@ -798,15 +994,28 @@ export function FieldTiles({
               className="feat-tile"
               style={home}
               data-at={at}
+              data-col={cell.col}
               data-film="1"
               data-epic="1"
               data-ink-under={overInk ? "1" : undefined}
-              aria-label={webOn ? "Hide modules" : "Show modules"}
-              aria-pressed={webOn}
+              aria-label={carouselSeat ? "Explore the product" : loneEpic ? (boardOn ? "Rest board" : "Habitat") : webOn ? "Hide modules" : "Show modules"}
+              aria-pressed={loneEpic ? boardOn : webOn}
               tabIndex={0}
               onPointerDown={(event) => {
-                if (aimInk(event, cell.col, cell.row)) return;
                 if (event.button !== 0) return;
+                if (carouselSeat) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  pickInk(carouselSeat.c, carouselSeat.r);
+                  return;
+                }
+                if (loneEpic) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  if (boardOn) closeLone();
+                  return;
+                }
+                if (aimInk(event, cell.col, cell.row)) return;
                 event.preventDefault();
                 event.stopPropagation();
                 toggleWeb();
@@ -817,6 +1026,46 @@ export function FieldTiles({
             </button>
           );
         }
+        if (carouselSeat && !boardOut) return null;
+        if (carouselSeat && cell.col === carouselSeat.c) {
+          if (Number.isFinite(minRow) && cell.row !== minRow) return null;
+          return (
+            <RangeCarousel
+              key={`${cell.col}-${cell.row}`}
+              style={{
+                gridColumn: carouselSeat.c + 1,
+                gridRow: "1 / -1",
+              }}
+              at={at}
+              live={boardOn}
+              armed={hubReady}
+              flat={reelFlat}
+              habitatHere={hubOnCarousel}
+              onView={takeView}
+              onSeat={(slot) => {
+                pickInk(carouselSeat.c, carouselSeat.r + (slot - RANGE_DISPLAY));
+              }}
+              onPick={(kind) => {
+                if (kind === "habitat") {
+                  if (rangeRead === "habitat" && !play) {
+                    simRef.current = false;
+                    setPlay(true);
+                    return;
+                  }
+                  if (!hubReady) return;
+                  if (hubOnCarousel) {
+                    setPlay(false);
+                    return;
+                  }
+                  pickInk(carouselSeat.c, carouselSeat.r);
+                  return;
+                }
+                if (kind === "technical") return;
+                setBoardOn(true);
+              }}
+            />
+          );
+        }
         if (inkShow && isInkMark(cell.col, cell.row, inkAt)) {
           return (
             <span
@@ -824,6 +1073,7 @@ export function FieldTiles({
               className="feat-tile"
               style={home}
               data-at={at}
+              data-col={cell.col}
               data-film="1"
               data-ink="1"
               aria-hidden="true"
@@ -845,6 +1095,7 @@ export function FieldTiles({
                 className={`feat-tile${on ? " is-on" : ""}`}
                 style={home}
                 data-at={at}
+                data-col={cell.col}
                 data-film="1"
                 data-mile="1"
                 onPointerDown={(event) => {
@@ -866,6 +1117,7 @@ export function FieldTiles({
                 className={`feat-tile${hit ? " is-on" : ""}`}
                 style={home}
                 data-at={at}
+                data-col={cell.col}
                 data-film="1"
                 data-path="1"
                 aria-hidden="true"
@@ -877,12 +1129,36 @@ export function FieldTiles({
               </span>
             );
           }
+          const keep = Boolean(showCells?.includes(at));
+          if (keep) {
+            return (
+              <button
+                key={`${cell.col}-${cell.row}`}
+                type="button"
+                className="feat-tile"
+                style={home}
+                data-at={at}
+                data-col={cell.col}
+                data-film="1"
+                data-keep="1"
+                data-rise={tileRise(cell.col, cell.row) || undefined}
+                aria-label="Explore the product"
+                onPointerDown={(event) => {
+                  if (event.button !== 0) return;
+                  event.preventDefault();
+                  event.stopPropagation();
+                  sendHub();
+                }}
+              />
+            );
+          }
           return (
             <span
               key={`${cell.col}-${cell.row}`}
               className="feat-tile"
               style={home}
               data-at={at}
+              data-col={cell.col}
               data-film="1"
               data-rise={tileRise(cell.col, cell.row) || undefined}
               aria-hidden="true"

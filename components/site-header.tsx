@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { isFieldPath } from "@/lib/lens";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { PlaceToggle } from "@/components/place";
 
 export function SiteHeader() {
@@ -27,8 +26,6 @@ export function SiteHeader() {
           </Link>
           <span className="head-sep" aria-hidden="true" />
           <PlaceToggle />
-          <span className="head-sep" aria-hidden="true" />
-          <ThemeToggle />
         </nav>
       </div>
     </header>

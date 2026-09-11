@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { Fragment_Mono, IBM_Plex_Sans_KR } from "next/font/google";
+import { Fragment_Mono, IBM_Plex_Sans_KR, Oswald } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
@@ -15,9 +15,15 @@ const fragment = Fragment_Mono({
 });
 
 const plex = IBM_Plex_Sans_KR({
-  weight: "400",
+  weight: ["400", "500"],
   subsets: ["latin"],
   variable: "--font-plex",
+});
+
+const oswald = Oswald({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-oswald",
 });
 
 const cy = localFont({
@@ -50,14 +56,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html
       lang="en-AU"
-      data-theme="dark"
+      data-theme="light"
       suppressHydrationWarning
-      className={`${fragment.variable} ${plex.variable} ${cy.variable} ${formaDisplay.variable} ${formaMicro.variable}`}
+      className={`${fragment.variable} ${plex.variable} ${oswald.variable} ${cy.variable} ${formaDisplay.variable} ${formaMicro.variable}`}
     >
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem("kit-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}`,
+            __html: `document.documentElement.setAttribute("data-theme","light");try{localStorage.setItem("kit-theme","light");}catch(e){}`,
           }}
         />
       </head>

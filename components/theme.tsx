@@ -24,13 +24,11 @@ function apply(theme: Theme) {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("dark");
+  const [theme, setThemeState] = useState<Theme>("light");
 
   useEffect(() => {
-    const attr = document.documentElement.getAttribute("data-theme");
-    const next = attr === "light" || attr === "dark" ? attr : "dark";
-    setThemeState(next);
-    apply(next);
+    setThemeState("light");
+    apply("light");
   }, []);
 
   const value = useMemo(

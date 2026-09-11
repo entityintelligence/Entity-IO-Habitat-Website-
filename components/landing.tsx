@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { story, heroFlip } from "@/content/copy";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { range, story, heroFlip } from "@/content/copy";
 import { PlaceToggle } from "@/components/place";
 import { FeatureGrid } from "@/components/feature-grid";
 import { EntitySpec } from "@/components/entity-spec";
@@ -112,7 +111,7 @@ function PlotPage({ headRef }: { headRef?: Ref<HTMLParagraphElement> }) {
     <section className="split-stage land land-story land-plot-stage">
       <div className="land-story-col">
         <p className="land-story-head" ref={headRef} aria-hidden="true">
-          <span className="land-hero-live">{story.hero}</span>
+          <span className="land-hero-live">{story.plotGuide.why}</span>
         </p>
       </div>
       <div className="land-spec-hold land-plot-hold">
@@ -129,7 +128,7 @@ function LandingHead({
   onHome: () => void;
   onJoin: () => void;
 }) {
-  const { offer, kitOn, holdKit, returnOffer, page } = useField();
+  const { offer, kitOn, holdKit, returnOffer } = useField();
   return (
     <header className="land-head">
       <div className="head-bar">
@@ -143,15 +142,10 @@ function LandingHead({
               onHome();
             }}
           >
-            HABITAT<span className="head-brand-slash">/</span>ENTITY ICT
+            ENTITY ICT
           </Link>
           <span className="head-sep" aria-hidden="true" />
-          {page === 2 ? (
-            <p className="head-plot">
-              {story.plotGuide.why}
-              <span>{story.plotGuide.how}</span>
-            </p>
-          ) : offer ? (
+          {offer ? (
             <TimeRead />
           ) : (
             <button
@@ -199,12 +193,14 @@ function LandingHead({
               onJoin();
             }}
           >
-            Enrollment
+            Pilot Product
+          </Link>
+          <span className="head-sep" aria-hidden="true" />
+          <Link href="/product" className="head-link">
+            {range.explore}
           </Link>
           <span className="head-sep" aria-hidden="true" />
           <PlaceToggle />
-          <span className="head-sep" aria-hidden="true" />
-          <ThemeToggle />
         </nav>
       </div>
     </header>
@@ -267,7 +263,9 @@ export function Landing() {
       const at = Math.max(0, Math.min(LAST, page));
       root.dataset.page = String(at);
       nextNum.textContent = String(Math.min(at + 2, LAST + 1)).padStart(2, "0");
-      if (live) live.textContent = at === LAST ? story.join : story.hero;
+      if (live) {
+        live.textContent = at === LAST ? story.join : at === 2 ? story.plotGuide.why : story.hero;
+      }
     };
 
     const nearest = () => {
@@ -335,6 +333,7 @@ export function Landing() {
       <LandingHead onHome={() => goRef.current(0)} onJoin={() => goRef.current(LAST)} />
       <h1 className="land-hero" ref={pinRef}>
         <span className="land-hero-live">{story.hero}</span>
+        <span className="land-hero-how">{story.plotGuide.how}</span>
       </h1>
       <div className="land-pager" ref={viewportRef}>
         <div className="land-track">
