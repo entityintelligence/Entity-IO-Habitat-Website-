@@ -114,15 +114,15 @@ export const story = {
     why: "The future is at your fingertips",
     how: "Select the desired system state  >  Entity ICT unlocks the pathway",
   },
-  core: "Explore Product Range",
+  core: "Explore Habitat 1: Genesis",
   coreTitle: "The Core Product",
-  coreAside: "Habitat",
+  coreAside: "Habitat 1: Genesis",
   coreBody: [
     "Centered around time management and operational health, our core product is a persistent generative software system that perpetually optimises an entire business toward its ideal state.",
     "Seven Native Capabilities",
     "At its core, Entity io holds your business as one coherent, evolving system — connecting its people, resources, projects, information and activity to understand the operation as a whole and continuously move it toward its highest achievable state.",
   ],
-  heroAside: "Entity Digital Twin",
+  heroAside: "Enhanced Digital Twins",
   problem: [
     "When the components of your business fall out of rhythm, you lose time – similar to a clock.",
     "We are developing a product line that holds them in rhythm, enabling your operation to run like clockwork.",
@@ -210,38 +210,44 @@ export const story = {
 export const heroFlip = [
   story.heroAside,
   "Temporal Projection",
-  "Autonomous Orchestration",
-  "Situational Awareness",
+  "Maximise Automation",
   "Universally Stack",
-  "Native AI Infrastructure",
+  "AI Native",
   "Radical Visibility",
-  "Systemic Propagation",
-  "Preserve Cognition",
   "Unlock Performance",
+] as const;
+
+export const plotHero = "Predict The Future";
+
+export const plotFlip = [
+  "Temporal Projection",
+  "Critical Path",
+  "System States",
+  "Preferred Futures",
+  "Before It Arrives",
 ] as const;
 
 export const rangeNumerals = ["I", "II", "III", "IV", "V", "VI", "VII"] as const;
 
 export const range = {
-  hero: "Explore Product Range",
-  aside: "Habitat",
+  hero: "Explore Habitat 1: Genesis",
+  aside: "Habitat 1: Genesis",
   enroll: "Pilot Product",
-  explore: "Explore Product",
+  explore: "Explore Habitat 1: Genesis",
   habitat: {
-    name: "Welcome to Habitat 01",
-    aside: "A certified asset, holding the digital identity of your business operation within one coherent command environment — shaped to funnel and push an entity through its evolutionary states.",
+    name: "Welcome to Habitat 1: Genesis",
+    aside: "A certified asset, holding the digital identity of your business operation within one coherent command environment. As that captured business evolves, it moves through states. Habitat 1 maps those states across time and space, forming a critical path toward the objective and guiding the entity through each successive state to reach it.",
     lines: [
-      "As your business evolves, it moves through a continuous sequence of states. Within Habitat 01, these states are mapped across time and space, revealing what needs to happen, when, where and in what order to move the entity toward its objective.",
-      "The mosaic offers a glimpse into this process. Each tile represents a possible state of the business, providing a visual point of entry into the journey toward a selected destination.",
+      "Information is delivered in context and translated into coordinated action, driving execution along the critical path while every change propagates through the entity — continuously recalibrating the pathway and keeping the operation aligned in motion.",
     ],
   },
   engineering: {
     name: "Technical Interpretation",
     lines: [
       "A persistent, self-regulating software system that identifies and generates its own optimal state within specific contextual parameters.",
-      "The native elements of the environment are centered around time management, operational health and frontier intelligence technology.",
+      "The native elements of the environment are centered around time management, operational health and frontier intelligence technology — which models the situational landscape an entity exists within and interprets an output to counter its conditions, establishing the next action required to progress toward that defined objective state.",
       "Effective Implementation: Requires a large volume of data from operationally complex subjects.",
-      "The product is engineered through seven influential fields. Each field is a constitutive discipline of Habitat 01 — the structure through which the environment reads an entity, predicts its next state and aligns the operation toward an objective.",
+      "The product is engineered through seven influential fields. Each field is a constitutive discipline of Habitat 1.",
       "Temporal · Spatial · Connectivity · Evolution · Cognition · Causality · Adaptation",
     ],
   },

@@ -57,14 +57,13 @@ export function buildField() {
     const start = 0;
     for (let col = start; col <= 6; col += 1) {
       if (col === 6 && row === 13) continue;
+      if (row === 13 && col <= 2) continue;
       pushCell(cells, col, row, "plot");
     }
   }
 
   for (let row = 14; row <= 18; row += 1) {
-    const start = row <= 15 ? 0 : 3;
-    for (let col = start; col <= 6; col += 1) {
-      if (row === 15 && col <= 2) continue;
+    for (let col = 3; col <= 6; col += 1) {
       pushCell(cells, col, row, "ask");
     }
   }

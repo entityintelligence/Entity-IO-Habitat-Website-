@@ -17,6 +17,7 @@ import type { EmblaCarouselType } from "embla-carousel";
 import { RangeCarousel, RANGE_DISPLAY, type RangeRead } from "@/components/range-carousel";
 
 const STEP_MS = 280;
+const LEAVE_MS = 520;
 const KIT_MARK_MS = 1150;
 const FILM_OUT = 3000;
 type PathKind = "line" | "corner";
@@ -93,7 +94,7 @@ const PATH_LEGS: { mile: MileAt; tiles: PathAt[] }[] = [
 ];
 const PATH_CELL = new Map(PATH_LEGS.flatMap((leg) => leg.tiles.map((tile) => [`${tile.col},${tile.row}`, tile] as const)));
 const HUB_HOME = { c: 4, r: 7 };
-const HUB_DEST = { c: 3, r: 12 };
+const HUB_DEST = { c: 3, r: 11 };
 type Seat = { c: number; r: number };
 function isHub(col: number, row: number, hop = HUB_HOME) {
   return (col === 3 && row === 1) || (col === hop.c && row === hop.r);
@@ -128,7 +129,7 @@ const DBL_MS = 320;
 const SWAP_LOCK = new Set<string>([
   "3,1",
   "4,7",
-  "3,12",
+  "3,11",
   "4,12",
   "5,12",
   "5,13",
@@ -146,8 +147,7 @@ const SWAP_POOL: string[] = [
   ...Array.from({ length: 5 }, (_, n) => Array.from({ length: 4 }, (_, i) => `${i + 3},${n + 9}`))
     .flat()
     .filter((id) => id !== "6,13"),
-  ...Array.from({ length: 5 }, (_, n) => Array.from({ length: 3 }, (_, col) => `${col},${n + 9}`)).flat(),
-  ...Array.from({ length: 3 }, (_, col) => `${col},14`),
+  ...Array.from({ length: 4 }, (_, n) => Array.from({ length: 3 }, (_, col) => `${col},${n + 9}`)).flat(),
   ...Array.from({ length: 5 }, (_, n) => Array.from({ length: 4 }, (_, i) => `${i + 3},${n + 14}`)).flat(),
 ].filter((id) => !SWAP_LOCK.has(id));
 
@@ -155,7 +155,7 @@ function hubDist(col: number, row: number) {
   return Math.min(
     Math.abs(col - 3) + Math.abs(row - 1),
     Math.abs(col - 4) + Math.abs(row - 7),
-    Math.abs(col - 3) + Math.abs(row - 12),
+    Math.abs(col - 3) + Math.abs(row - 11),
   );
 }
 
@@ -179,6 +179,26 @@ function pathHit(col: number, row: number, path: PathAt[] | null) {
 
 function mileHit(col: number, row: number) {
   return MILESTONES.find((item) => item.col === col && item.row === row) ?? null;
+}
+
+function CriticalPathHint() {
+  return (
+    <span className="range-gate-hint" aria-hidden="true">
+      <span className="range-gate-go">
+        <svg className="range-gate-bolt" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M13.6 2.4 L6.2 13.2 H12.1 L10.4 21.6 L17.9 10.5 H12 Z"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.55"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        Critical Path
+      </span>
+    </span>
+  );
 }
 
 function filmFlip(col: number, row: number, now: number) {
@@ -240,9 +260,11 @@ type FieldCtx = {
   webOn: boolean;
   hubAt: { c: number; r: number };
   hubWalk: boolean;
+  hubStart: Seat | null;
   inkShow: boolean;
   inkAt: Seat | null;
   pickInk: (col: number, row: number) => void;
+  recallHome: () => void;
   restHub: () => void;
   toggleWeb: () => void;
   endFilm: (played?: boolean) => void;
@@ -401,6 +423,15 @@ export function EntityField({
     setInkAt({ c: col, r: row });
     setInkShow(true);
   }, [page]);
+  const voyageRef = useRef<number[]>([]);
+  const recallRef = useRef(false);
+  const leaveRef = useRef(false);
+  const recallHome = useCallback(() => {
+    if (!hubStart) return;
+    recallRef.current = true;
+    setInkAt({ c: hubStart.c, r: hubStart.r });
+    setInkShow(false);
+  }, [hubStart]);
 
   const restHub = useCallback(() => {
     setWebOn(false);
@@ -640,7 +671,28 @@ export function EntityField({
       setHubTrail([]);
       return;
     }
-    setHubTrail(hubSteps(field.cells, at, page, inkAt, park));
+    if (recallRef.current) {
+      recallRef.current = false;
+      const recorded = voyageRef.current.length
+        ? voyageRef.current
+        : hubStart
+          ? hubSteps(field.cells, hubStart, page, park, park)
+          : [];
+      const start = hubStart ? field.cells.findIndex((cell) => cell.col === hubStart.c && cell.row === hubStart.r) : -1;
+      const back = [...recorded].reverse().slice(1);
+      if (start >= 0) back.push(start);
+      leaveRef.current = true;
+      const first = back[0];
+      const cell = first != null ? field.cells[first] : null;
+      if (cell) setHubAt({ c: cell.col, r: cell.row });
+      setHubTrail(back.slice(1));
+      return;
+    }
+    const steps = hubSteps(field.cells, at, page, inkAt, park);
+    if (hubStart && inkAt && inkAt.c === park.c && inkAt.r === park.r) {
+      voyageRef.current = steps;
+    }
+    setHubTrail(steps);
   }, [page, inkAt, field.cells, park, hubStart]);
 
   useEffect(() => {
@@ -652,12 +704,16 @@ export function EntityField({
 
   useEffect(() => {
     if (hubTrail.length === 0) return;
+    const leave = leaveRef.current;
+    leaveRef.current = false;
+    const slow = leave && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const wait = slow ? LEAVE_MS : STEP_MS;
     const id = window.setTimeout(() => {
       const [head, ...rest] = hubTrail;
       const cell = field.cells[head];
       if (cell) setHubAt({ c: cell.col, r: cell.row });
       setHubTrail(rest);
-    }, STEP_MS);
+    }, wait);
     return () => window.clearTimeout(id);
   }, [hubTrail, field.cells]);
 
@@ -701,15 +757,17 @@ export function EntityField({
       webOn,
       hubAt,
       hubWalk: hubTrail.length > 0,
+      hubStart: hubStart ?? null,
       inkShow,
       inkAt,
       pickInk,
+      recallHome,
       restHub,
       toggleWeb,
       endFilm,
       returnOffer,
     }),
-    [field.cells, entityAt, goal, trail, wave, fore, go, jump, tap, open, kitOn, holdKit, route, watchMs, watchPrev, watchPrevMs, watchRun, page, film, filmAt, offer, offerPhase, offerLine, offerMorph, offerWeb, offerPath, mileShow, boardFlip, boardShift, boardSeat, webOn, hubAt, hubTrail.length, inkShow, inkAt, pickInk, restHub, toggleWeb, endFilm, returnOffer],
+    [field.cells, entityAt, goal, trail, wave, fore, go, jump, tap, open, kitOn, holdKit, route, watchMs, watchPrev, watchPrevMs, watchRun, page, film, filmAt, offer, offerPhase, offerLine, offerMorph, offerWeb, offerPath, mileShow, boardFlip, boardShift, boardSeat, webOn, hubAt, hubTrail.length, hubStart, inkShow, inkAt, pickInk, recallHome, restHub, toggleWeb, endFilm, returnOffer],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
@@ -778,7 +836,7 @@ export function FieldTiles({
   onCover?: (on: boolean) => void;
   showCells?: string[];
 }) {
-  const { cells, entityAt, goal, trail, wave, fore, setFore, go, jump, tap, open, kitOn, route, page, film, filmAt, offer, offerPhase, offerPath, mileShow, boardShift, boardSeat, webOn, hubAt, hubWalk, inkShow, inkAt, pickInk, restHub, toggleWeb } = useField();
+  const { cells, entityAt, goal, trail, wave, fore, setFore, go, jump, tap, open, kitOn, route, page, film, filmAt, offer, offerPhase, offerPath, mileShow, boardShift, boardSeat, webOn, hubAt, hubWalk, hubStart, inkShow, inkAt, pickInk, recallHome, restHub, toggleWeb } = useField();
   const lastTap = useRef<{ t: number; i: number } | null>(null);
   const onViewRef = useRef(onView);
   onViewRef.current = onView;
@@ -793,15 +851,25 @@ export function FieldTiles({
   const [hubReady, setHubReady] = useState(false);
   const [away, setAway] = useState(false);
   const [docked, setDocked] = useState(false);
+  const [recalling, setRecalling] = useState(false);
   const habitatOn = Boolean(carouselSeat && coverOn);
   const reelFlat = Boolean(carouselSeat && play && rangeRead === "habitat");
   const hubOnCarousel = Boolean(carouselSeat && hubAt.c === carouselSeat.c && hubAt.r === carouselSeat.r);
   const boardOut = docked || hubOnCarousel;
+  const charged = Boolean(carouselSeat && !hubWalk && !recalling && (!docked || hubOnCarousel));
+  const [flash, setFlash] = useState(false);
+  const chargeRef = useRef<HTMLButtonElement | null>(null);
+  const floodRef = useRef(false);
+  const homeTimer = useRef(0);
   const coverRef = useRef(false);
   const simRef = useRef(false);
   const waveAtRef = useRef<number | "done" | null>(null);
   coverRef.current = coverOn;
   waveAtRef.current = waveAt;
+  const dockedRef = useRef(false);
+  const onCarouselRef = useRef(false);
+  dockedRef.current = docked;
+  onCarouselRef.current = hubOnCarousel;
   const takeView = useCallback((next: RangeRead | null) => {
     setRangeRead(next);
   }, []);
@@ -838,12 +906,14 @@ export function FieldTiles({
     if (rangeRead === "habitat") {
       setBoardOn(true);
       if (!play) {
-        simRef.current = false;
-        cover(false);
-        setAway(false);
-        setHubReady(false);
-        setWaveDir(null);
-        setWaveAt(null);
+        if (!onCarouselRef.current && !dockedRef.current) {
+          simRef.current = false;
+          cover(false);
+          setAway(false);
+          setHubReady(false);
+          setWaveDir(null);
+          setWaveAt(null);
+        }
         publish("habitat");
         return;
       }
@@ -912,8 +982,67 @@ export function FieldTiles({
     if (home) setPlay(false);
   }, [away, carouselSeat, hubAt, hubWalk, inkAt, play]);
   useEffect(() => {
-    if (hubOnCarousel) setDocked(true);
+    if (!hubOnCarousel || floodRef.current) return;
+    floodRef.current = true;
+    setDocked(true);
   }, [hubOnCarousel]);
+  useEffect(() => {
+    const el = chargeRef.current;
+    if (!charged || !el) return;
+    el.style.setProperty("--charge", "0");
+    const born = performance.now();
+    let raf = 0;
+    const frame = (now: number) => {
+      const t = Math.min(1, (now - born) / 15000);
+      el.style.setProperty("--charge", (t * t).toFixed(4));
+      if (t < 1) raf = requestAnimationFrame(frame);
+    };
+    raf = requestAnimationFrame(frame);
+    return () => {
+      cancelAnimationFrame(raf);
+      el.style.setProperty("--charge", "0");
+    };
+  }, [charged]);
+  useEffect(() => {
+    if (!charged || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setFlash(false);
+      return;
+    }
+    let cancel = false;
+    let timer = 0;
+    const beat = () => {
+      const hold = 28 + Math.random() * 36;
+      setFlash(true);
+      timer = window.setTimeout(() => {
+        if (cancel) return;
+        setFlash(false);
+        if (Math.random() < 0.12) {
+          timer = window.setTimeout(() => {
+            if (cancel) return;
+            setFlash(true);
+            timer = window.setTimeout(() => {
+              if (cancel) return;
+              setFlash(false);
+              wait();
+            }, 22 + Math.random() * 24);
+          }, 70 + Math.random() * 90);
+          return;
+        }
+        wait();
+      }, hold);
+    };
+    const wait = () => {
+      timer = window.setTimeout(() => {
+        if (cancel) return;
+        beat();
+      }, 1400 + Math.random() * 2600);
+    };
+    wait();
+    return () => {
+      cancel = true;
+      window.clearTimeout(timer);
+    };
+  }, [charged]);
   const aimInk = (event: { button: number; preventDefault: () => void; stopPropagation: () => void }, col: number, row: number) => {
     if (!boardOn || page < 2 || event.button !== 0) return false;
     if (carouselSeat && (rangeRead !== "habitat" || !hubReady)) return false;
@@ -926,6 +1055,32 @@ export function FieldTiles({
     if (!carouselSeat) return;
     pickInk(carouselSeat.c, carouselSeat.r);
   };
+  const callHome = () => {
+    if (!hubStart || recalling) return;
+    if (carouselSeat && rangeRead !== "habitat") return;
+    setRecalling(true);
+    setPlay(false);
+    setCoverOn(false);
+    onCoverRef.current?.(false);
+    setWaveDir(null);
+    setWaveAt(null);
+    setHubReady(false);
+    recallHome();
+    const wait = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 1100;
+    window.clearTimeout(homeTimer.current);
+    homeTimer.current = window.setTimeout(() => {
+      setDocked(false);
+      setRecalling(false);
+    }, wait);
+  };
+  useEffect(() => () => window.clearTimeout(homeTimer.current), []);
+  useEffect(() => {
+    if (!hubStart || hubWalk) return;
+    if (hubAt.c !== hubStart.c || hubAt.r !== hubStart.r) return;
+    floodRef.current = false;
+    setDocked(false);
+    setRecalling(false);
+  }, [hubAt, hubStart, hubWalk]);
   const openAt = (cell: FieldCell) => cellOpen(cell, kitOn);
   const zone = cells
     .map((cell, index) => ({ cell, index }))
@@ -951,6 +1106,7 @@ export function FieldTiles({
       data-board={boardOn ? "1" : undefined}
       data-range={carouselSeat ? "1" : undefined}
       data-dock={carouselSeat && boardOut ? "1" : undefined}
+      data-recall={recalling ? "1" : undefined}
       onMouseDown={(event) => event.stopPropagation()}
       onTouchStart={(event) => event.stopPropagation()}
       onPointerDown={(event) => event.stopPropagation()}
@@ -984,50 +1140,66 @@ export function FieldTiles({
           ["--push" as string]: hubDist(cell.col, cell.row),
           ["--col" as string]: cell.col,
         };
-        if (carouselSeat && cell.col <= 2 && !coverOn && !showCells?.includes(`${cell.col},${cell.row}`) && !isHub(cell.col, cell.row, hubAt)) return null;
+        const habitatWelcome = rangeRead === "habitat";
+        const gateLeft = Boolean(hubStart && (hubAt.c !== hubStart.c || hubAt.r !== hubStart.r));
+        if (
+          carouselSeat &&
+          !boardOut &&
+          !isHub(cell.col, cell.row, hubAt) &&
+          !(showCells?.includes(`${cell.col},${cell.row}`) && habitatWelcome && gateLeft)
+        ) {
+          return null;
+        }
         if (isHub(cell.col, cell.row, hubAt) && (!carouselSeat || !hubOnCarousel)) {
-          const overInk = inkShow && isInkMark(cell.col, cell.row, inkAt);
+          const overInk = !carouselSeat && inkShow && isInkMark(cell.col, cell.row, inkAt);
+          const leaving = Boolean(
+            recalling && carouselSeat && hubAt.c === carouselSeat.c && hubAt.r === carouselSeat.r + 1,
+          );
           return (
-            <button
-              key={`${cell.col}-${cell.row}`}
-              type="button"
-              className="feat-tile"
-              style={home}
-              data-at={at}
-              data-col={cell.col}
-              data-film="1"
-              data-epic="1"
-              data-ink-under={overInk ? "1" : undefined}
-              aria-label={carouselSeat ? "Explore the product" : loneEpic ? (boardOn ? "Rest board" : "Habitat") : webOn ? "Hide modules" : "Show modules"}
-              aria-pressed={loneEpic ? boardOn : webOn}
-              tabIndex={0}
-              onPointerDown={(event) => {
-                if (event.button !== 0) return;
-                if (carouselSeat) {
+            <span key={`${cell.col}-${cell.row}`} className="range-gate" style={home} data-leave={leaving ? "1" : undefined}>
+              <button
+                ref={chargeRef}
+                type="button"
+                className="feat-tile"
+                data-at={at}
+                data-col={cell.col}
+                data-film="1"
+                data-epic="1"
+                data-charge={charged ? "1" : undefined}
+                data-flash={charged && flash ? "1" : undefined}
+                data-ink-under={overInk ? "1" : undefined}
+                aria-label={carouselSeat ? "Explore the product" : loneEpic ? (boardOn ? "Rest board" : "Habitat") : webOn ? "Hide modules" : "Show modules"}
+                aria-pressed={loneEpic ? boardOn : webOn}
+                tabIndex={0}
+                onPointerDown={(event) => {
+                  if (event.button !== 0) return;
+                  if (carouselSeat) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    pickInk(carouselSeat.c, carouselSeat.r);
+                    return;
+                  }
+                  if (loneEpic) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    if (boardOn) closeLone();
+                    return;
+                  }
+                  if (aimInk(event, cell.col, cell.row)) return;
                   event.preventDefault();
                   event.stopPropagation();
-                  pickInk(carouselSeat.c, carouselSeat.r);
-                  return;
-                }
-                if (loneEpic) {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  if (boardOn) closeLone();
-                  return;
-                }
-                if (aimInk(event, cell.col, cell.row)) return;
-                event.preventDefault();
-                event.stopPropagation();
-                toggleWeb();
-              }}
-            >
-              {overInk ? <EpicMark ink /> : null}
-              <EpicMark />
-            </button>
+                  toggleWeb();
+                }}
+              >
+                {overInk ? <EpicMark ink /> : null}
+                <EpicMark />
+              </button>
+              {carouselSeat ? null : charged ? <CriticalPathHint /> : null}
+            </span>
           );
         }
-        if (carouselSeat && !boardOut) return null;
         if (carouselSeat && cell.col === carouselSeat.c) {
+          if (recalling && !hubOnCarousel) return null;
           if (Number.isFinite(minRow) && cell.row !== minRow) return null;
           return (
             <RangeCarousel
@@ -1041,20 +1213,17 @@ export function FieldTiles({
               armed={hubReady}
               flat={reelFlat}
               habitatHere={hubOnCarousel}
+              charge={hubOnCarousel && charged}
+              chargeRef={chargeRef}
+              flash={hubOnCarousel && charged && flash}
               onView={takeView}
               onSeat={(slot) => {
                 pickInk(carouselSeat.c, carouselSeat.r + (slot - RANGE_DISPLAY));
               }}
               onPick={(kind) => {
                 if (kind === "habitat") {
-                  if (rangeRead === "habitat" && !play) {
-                    simRef.current = false;
-                    setPlay(true);
-                    return;
-                  }
-                  if (!hubReady) return;
                   if (hubOnCarousel) {
-                    setPlay(false);
+                    callHome();
                     return;
                   }
                   pickInk(carouselSeat.c, carouselSeat.r);
@@ -1066,7 +1235,7 @@ export function FieldTiles({
             />
           );
         }
-        if (inkShow && isInkMark(cell.col, cell.row, inkAt)) {
+        if (inkShow && !carouselSeat && isInkMark(cell.col, cell.row, inkAt)) {
           return (
             <span
               key={`${cell.col}-${cell.row}`}
@@ -1129,9 +1298,10 @@ export function FieldTiles({
               </span>
             );
           }
-          const keep = Boolean(showCells?.includes(at));
+          const keep = Boolean(showCells?.includes(at) && rangeRead === "habitat");
           if (keep) {
-            return (
+            const canHome = rangeRead === "habitat";
+            return canHome ? (
               <button
                 key={`${cell.col}-${cell.row}`}
                 type="button"
@@ -1142,13 +1312,25 @@ export function FieldTiles({
                 data-film="1"
                 data-keep="1"
                 data-rise={tileRise(cell.col, cell.row) || undefined}
-                aria-label="Explore the product"
+                aria-label="Return Habitat"
                 onPointerDown={(event) => {
                   if (event.button !== 0) return;
                   event.preventDefault();
                   event.stopPropagation();
-                  sendHub();
+                  callHome();
                 }}
+              />
+            ) : (
+              <span
+                key={`${cell.col}-${cell.row}`}
+                className="feat-tile"
+                style={home}
+                data-at={at}
+                data-col={cell.col}
+                data-film="1"
+                data-keep="1"
+                data-rise={tileRise(cell.col, cell.row) || undefined}
+                aria-hidden="true"
               />
             );
           }
@@ -1222,6 +1404,19 @@ export function FieldTiles({
           </button>
         );
       })}
+      {carouselSeat && hubStart && rangeRead === "habitat" && Number.isFinite(minRow) ? (
+        <span
+          className="range-gate"
+          style={{
+            gridColumn: hubStart.c + 1,
+            gridRow: hubStart.r - minRow + 1,
+            pointerEvents: "none",
+          }}
+          aria-hidden="true"
+        >
+          <CriticalPathHint />
+        </span>
+      ) : null}
     </div>
   );
 }

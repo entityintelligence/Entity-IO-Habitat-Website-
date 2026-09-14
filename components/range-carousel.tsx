@@ -1,7 +1,7 @@
 "use client";
 
 import { range, rangeNumerals } from "@/content/copy";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type Ref } from "react";
 import { flushSync } from "react-dom";
 
 export type RangeView = (typeof range.views)[number];
@@ -51,7 +51,7 @@ function tileName(tile: Tile) {
 }
 
 function tileGlyph(tile: Tile) {
-  if (tile.kind === "technical") return "+";
+  if (tile.kind === "technical") return "TI";
   if (tile.kind === "system") return rangeNumerals[tile.system ?? 0];
   return undefined;
 }
@@ -120,6 +120,9 @@ export function RangeCarousel({
   armed,
   flat = false,
   habitatHere = true,
+  charge = false,
+  chargeRef,
+  flash = false,
   onPick,
   onSeat,
   onView,
@@ -130,6 +133,9 @@ export function RangeCarousel({
   armed?: boolean;
   flat?: boolean;
   habitatHere?: boolean;
+  charge?: boolean;
+  chargeRef?: Ref<HTMLButtonElement>;
+  flash?: boolean;
   onPick: (kind: "habitat" | "technical" | number) => void;
   onSeat?: (slot: number) => void;
   onView?: (view: RangeRead | null) => void;
@@ -149,6 +155,8 @@ export function RangeCarousel({
   const stepRef = useRef<(next: Dir) => void>(() => undefined);
   const onViewRef = useRef(onView);
   onViewRef.current = onView;
+  const hereRef = useRef(habitatHere);
+  hereRef.current = habitatHere;
 
   const shown = RING[wrap(head + DISPLAY)];
   const read: RangeRead | null = viewOf(shown);
@@ -227,8 +235,11 @@ export function RangeCarousel({
     let wheelDir: 0 | Dir = 0;
     let wheelSpent = false;
 
-    const ignore = (target: EventTarget | null) =>
-      target instanceof HTMLElement && Boolean(target.closest("input, textarea, select"));
+    const ignore = (target: EventTarget | null) => {
+      if (!(target instanceof HTMLElement)) return false;
+      if (target.closest("input, textarea, select")) return true;
+      return Boolean(hereRef.current && target.closest(".range-reel-slide.is-on.is-hab"));
+    };
 
     const take = (next: Dir) => {
       if (!open.current) return;
@@ -302,6 +313,7 @@ export function RangeCarousel({
       return;
     }
     if (slot === DISPLAY) {
+      if (tile.kind === "habitat" && habitatHere) return;
       onPick(tile.kind === "habitat" ? "habitat" : tile.kind === "technical" ? "technical" : tile.system ?? 0);
       return;
     }
@@ -323,9 +335,8 @@ export function RangeCarousel({
           const slot = base + shift;
           const name = tileName(tile);
           const glyph = tileGlyph(tile);
-          const plus = tile.kind === "technical";
           const on = slot === DISPLAY;
-          const showMark = on && (plus || (tile.kind === "habitat" && habitatHere));
+          const showMark = on && tile.kind === "habitat" && habitatHere;
           return (
             <div
               key={tile.id}
@@ -333,17 +344,26 @@ export function RangeCarousel({
               style={{ ["--slot" as string]: String(slot) }}
             >
               <button
+                ref={charge && on && tile.kind === "habitat" ? chargeRef : undefined}
                 type="button"
                 className={`feat-tile range-reel-slide ${slotTone(slot)}${tile.kind === "habitat" ? " is-hab" : ""}`}
+                data-charge={charge && on && tile.kind === "habitat" ? "1" : undefined}
+                data-flash={flash && on && tile.kind === "habitat" ? "1" : undefined}
                 aria-label={name ?? "Board tile"}
                 aria-current={on ? "true" : undefined}
                 tabIndex={slot < 0 || slot >= COLS ? -1 : undefined}
+                onPointerDown={(event) => {
+                  if (event.button !== 0) return;
+                  if (!on || tile.kind !== "habitat" || !habitatHere) return;
+                  event.preventDefault();
+                  onPick("habitat");
+                }}
                 onClick={() => onTile(tile, slot)}
               >
-                {showMark ? <HabitatMark spread={plus} /> : null}
+                {showMark ? <HabitatMark /> : null}
                 {on && glyph ? (
                   <p className="range-reel-label">
-                    <span className={`land-hero-live range-numeral${plus ? " is-plus" : ""}`}>{glyph}</span>
+                    <span className="land-hero-live range-numeral">{glyph}</span>
                   </p>
                 ) : null}
               </button>

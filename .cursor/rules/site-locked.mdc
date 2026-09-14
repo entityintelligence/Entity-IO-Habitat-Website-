@@ -1,0 +1,23 @@
+---
+description: The public site is complete. Do not reopen finished design unless asked.
+alwaysApply: true
+---
+
+# Site locked (complete)
+
+The Entity ICT site is **locked**. Landing, product range, Habitat journey, carousel, and copy are finished. Do not redesign, restyle, or “improve” them.
+
+Work only in **Entity io : Kit**. Do not edit the Desktop folder named KIT sales.
+
+## Allowed without asking
+
+- Wire waitlist / enquire emails
+- Domain, DNS, and production deploy
+- Fixes the user explicitly requested
+
+## Do not
+
+- Restyle landing tiles or change field geometry
+- Reopen rejected Habitat extras (glow, auto-spin, idle drift, fade-mask, Habitat schematic dump, Commence, etc.)
+- Change Habitat / carousel / Critical Path behaviour unless asked
+- Commit secrets (`.env`, API keys, `data/waitlist.json`)

@@ -4,5 +4,7 @@ out
 data/waitlist.json
 .env
 .env.local
+.env*.local
 .DS_Store
 *.log
+tsconfig.tsbuildinfo

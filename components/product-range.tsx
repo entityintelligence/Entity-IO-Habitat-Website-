@@ -59,14 +59,14 @@ export function ProductRange() {
         <header className="land-head">
           <div className="head-bar">
             <div className="head-ident">
-              <Link href="/" className="head-brand">
-                ENTITY ICT
+              <Link href="/" className="head-mark-hit" aria-label="Habitat">
+                <HabitatMark />
               </Link>
               <span className="head-sep" aria-hidden="true" />
               <TimeRead />
               <span className="head-sep" aria-hidden="true" />
-              <Link href="/" className="head-mark-hit" aria-label="Habitat">
-                <HabitatMark />
+              <Link href="/" className="head-brand">
+                ENTITY ICT
               </Link>
             </div>
             <nav className="head-rail">
@@ -84,7 +84,7 @@ export function ProductRange() {
         </header>
         <section className="split-stage land land-story land-plot-stage">
           {view ? (
-            <div className="land-story-col" key={view.name}>
+            <div className="land-story-col" key={view.name} data-numeral={numeral ? "1" : undefined}>
               <p className="land-story-head">
                 <span className="land-hero-live">
                   {numeral ? <span className="range-numeral">{numeral}.</span> : null}
@@ -111,7 +111,6 @@ export function ProductRange() {
                       </p>
                       {view.lines.length > 1 ? (
                         <div className="range-foot">
-                          {read === "technical" ? null : <span className="land-story-rule" aria-hidden="true" />}
                           <ul className="range-uses">
                             {view.lines[view.lines.length - 1].split(" · ").map((item) => (
                               <li key={item}>{item}</li>

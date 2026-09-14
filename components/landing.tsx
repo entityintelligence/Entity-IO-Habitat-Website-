@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { range, story, heroFlip } from "@/content/copy";
+import { range, story, heroFlip, plotHero, plotFlip } from "@/content/copy";
 import { PlaceToggle } from "@/components/place";
 import { FeatureGrid } from "@/components/feature-grid";
 import { EntitySpec } from "@/components/entity-spec";
@@ -21,12 +21,12 @@ function isField(node: EventTarget | null) {
   return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
 }
 
-function HeroAside() {
+function HeroAside({ lines }: { lines: readonly string[] }) {
   const [n, setN] = useState(0);
   const [open, setOpen] = useState(false);
   const [snap, setSnap] = useState(false);
-  const front = heroFlip[n];
-  const back = heroFlip[(n + 1) % heroFlip.length];
+  const front = lines[n];
+  const back = lines[(n + 1) % lines.length];
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -40,7 +40,7 @@ function HeroAside() {
       flipId = window.setTimeout(() => {
         setSnap(true);
         setOpen(false);
-        setN((i) => (i + 1) % heroFlip.length);
+        setN((i) => (i + 1) % lines.length);
         snapId = window.setTimeout(() => {
           setSnap(false);
           holdId = window.setTimeout(cycle, HERO_HOLD_MS);
@@ -53,11 +53,11 @@ function HeroAside() {
       window.clearTimeout(snapId);
       window.clearTimeout(holdId);
     };
-  }, []);
+  }, [lines]);
 
   return (
     <span className="land-hero-flip" aria-live="polite">
-      {heroFlip.map((line) => (
+      {lines.map((line) => (
         <span key={line} className="land-hero-flip-sizer" aria-hidden="true">
           {line}
         </span>
@@ -67,6 +67,20 @@ function HeroAside() {
         <span className="land-hero-flip-face is-back">{back}</span>
       </span>
     </span>
+  );
+}
+
+function HeroLine({ title, lines }: { title: string; lines: readonly string[] }) {
+  return (
+    <p className="land-hero-hold">
+      <span className="land-hero-ghost" aria-hidden="true">
+        <span className="land-hero-live">{title}</span>
+      </span>
+      <span className="land-hero-slash land-hero-live">/</span>
+      <span className="land-hero-aside land-hero-live">
+        <HeroAside lines={lines} />
+      </span>
+    </p>
   );
 }
 
@@ -110,13 +124,12 @@ function PlotPage({ headRef }: { headRef?: Ref<HTMLParagraphElement> }) {
   return (
     <section className="split-stage land land-story land-plot-stage">
       <div className="land-story-col">
-        <p className="land-story-head" ref={headRef} aria-hidden="true">
-          <span className="land-hero-live">{story.plotGuide.why}</span>
-        </p>
+        <p className="land-story-head" ref={headRef} aria-hidden="true" />
       </div>
       <div className="land-spec-hold land-plot-hold">
         <FieldTiles zones={["plot"]} className="land-spec" />
       </div>
+      <HeroLine title={plotHero} lines={plotFlip} />
     </section>
   );
 }
@@ -133,33 +146,6 @@ function LandingHead({
     <header className="land-head">
       <div className="head-bar">
         <div className="head-ident">
-          <Link
-            href="/"
-            className="head-brand"
-            onClick={(event) => {
-              event.preventDefault();
-              if (!offer) returnOffer();
-              onHome();
-            }}
-          >
-            ENTITY ICT
-          </Link>
-          <span className="head-sep" aria-hidden="true" />
-          {offer ? (
-            <TimeRead />
-          ) : (
-            <button
-              type="button"
-              className="head-link head-kit"
-              data-on={kitOn ? "1" : undefined}
-              aria-pressed={kitOn}
-              aria-label={kitOn ? "Lock Potential" : "Unlock Potential"}
-              onClick={holdKit}
-            >
-              {kitOn ? "Lock Potential" : "Unlock Potential"}
-            </button>
-          )}
-          <span className="head-sep" aria-hidden="true" />
           <Link
             href="/"
             className="head-mark-hit"
@@ -182,6 +168,33 @@ function LandingHead({
                 <path className="feat-epic-face" d="M37 11 L51 22 L51 42 L37 53" />
               </g>
             </svg>
+          </Link>
+          <span className="head-sep" aria-hidden="true" />
+          {offer ? (
+            <TimeRead />
+          ) : (
+            <button
+              type="button"
+              className="head-link head-kit"
+              data-on={kitOn ? "1" : undefined}
+              aria-pressed={kitOn}
+              aria-label={kitOn ? "Lock Potential" : "Unlock Potential"}
+              onClick={holdKit}
+            >
+              {kitOn ? "Lock Potential" : "Unlock Potential"}
+            </button>
+          )}
+          <span className="head-sep" aria-hidden="true" />
+          <Link
+            href="/"
+            className="head-brand"
+            onClick={(event) => {
+              event.preventDefault();
+              if (!offer) returnOffer();
+              onHome();
+            }}
+          >
+            ENTITY ICT
           </Link>
         </div>
         <nav className="head-rail">
@@ -242,20 +255,22 @@ export function Landing() {
 
     const pin = pinRef.current;
     const slot = slotRef.current;
-    const slotCopy = slotCopyRef.current;
     const joinSlot = joinSlotRef.current;
     const live = pin?.querySelector<HTMLElement>(".land-hero-live");
 
     const place = () => {
       if (!pin) return;
       const at = Number(root.dataset.page ?? 0);
-      const mark = at === LAST ? joinSlot : at === 2 ? slotCopy : slot;
-      if (!mark) return;
       const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
       const bottomPad = (window.matchMedia("(max-width: 860px)").matches ? 0.15 : 0.35) * rem + 96;
       const restTop = root.clientHeight - bottomPad - pin.offsetHeight;
-      const slotTop = mark.getBoundingClientRect().top - root.getBoundingClientRect().top;
       pin.style.bottom = "auto";
+      const mark = at === LAST ? joinSlot : at === 2 ? null : slot;
+      if (!mark) {
+        pin.style.top = `${restTop}px`;
+        return;
+      }
+      const slotTop = mark.getBoundingClientRect().top - root.getBoundingClientRect().top;
       pin.style.top = `${Math.min(restTop, slotTop)}px`;
     };
 
@@ -264,7 +279,7 @@ export function Landing() {
       root.dataset.page = String(at);
       nextNum.textContent = String(Math.min(at + 2, LAST + 1)).padStart(2, "0");
       if (live) {
-        live.textContent = at === LAST ? story.join : at === 2 ? story.plotGuide.why : story.hero;
+        live.textContent = at === LAST ? story.join : at === 2 ? plotHero : story.hero;
       }
     };
 
@@ -333,21 +348,12 @@ export function Landing() {
       <LandingHead onHome={() => goRef.current(0)} onJoin={() => goRef.current(LAST)} />
       <h1 className="land-hero" ref={pinRef}>
         <span className="land-hero-live">{story.hero}</span>
-        <span className="land-hero-how">{story.plotGuide.how}</span>
       </h1>
       <div className="land-pager" ref={viewportRef}>
         <div className="land-track">
           <section className="split-stage land land-open">
             <FeatureGrid />
-            <p className="land-hero-hold">
-              <span className="land-hero-ghost" aria-hidden="true">
-                <span className="land-hero-live">{story.hero}</span>
-              </span>
-              <span className="land-hero-slash land-hero-live">/</span>
-              <span className="land-hero-aside land-hero-live">
-                <HeroAside />
-              </span>
-            </p>
+            <HeroLine title={story.hero} lines={heroFlip} />
           </section>
           <StoryPage headRef={slotRef} />
           <PlotPage headRef={slotCopyRef} />

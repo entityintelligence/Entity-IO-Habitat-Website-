@@ -1,8 +1,8 @@
 import { ProductRange } from "@/components/product-range";
 
 export const metadata = {
-  title: "Product Range — KIT",
-  description: "Explore the KIT product range: core entity, native capability, and the operating surface.",
+  title: "Habitat 1: Genesis — KIT",
+  description: "Explore Habitat 1: Genesis — core entity, native capability, and the operating surface.",
 };
 
 export default function ProductPage() {
