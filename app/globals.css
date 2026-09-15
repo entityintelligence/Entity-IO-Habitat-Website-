@@ -2016,19 +2016,9 @@ a.land-core-kicker:hover .land-ask-go-mark {
   z-index: 2;
 }
 
-.range-page .land-story-col[data-numeral="1"] {
-  justify-content: center;
-  padding-top: 0;
-  padding-bottom: 0;
-}
-
-.range-page .land-story-col[data-numeral="1"] .land-story-body,
-.range-page .land-story-col[data-numeral="1"] .land-story-copy {
-  flex: none;
-}
-
 .range-page .land-story-col[data-numeral="1"] .range-foot {
-  margin-top: 3rem;
+  margin-top: auto;
+  padding-top: 3rem;
 }
 
 .range-page .land-story-head {
@@ -2067,7 +2057,7 @@ a.land-core-kicker:hover .land-ask-go-mark {
   flex: none;
   flex-direction: column;
   width: 100%;
-  margin-top: auto;
+  margin-top: 3rem;
 }
 
 .range-page .range-uses {
@@ -2075,7 +2065,6 @@ a.land-core-kicker:hover .land-ask-go-mark {
   flex-direction: column;
   gap: 0.4rem;
   width: 100%;
-  min-height: calc(6 * (var(--type-title) * 1.5) + 5 * 0.4rem);
   margin: 0;
   padding: 0;
   list-style: none;
