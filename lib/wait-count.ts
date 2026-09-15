@@ -28,7 +28,3 @@ export async function appendWaitlist(record: unknown) {
 export async function waitingCount() {
   return waitOffset() + (await readWaitlist()).length;
 }
-
-export function formatWaiting(n: number) {
-  return String(n).padStart(3, "0");
-}

@@ -8,3 +8,4 @@ data/waitlist.json
 .DS_Store
 *.log
 tsconfig.tsbuildinfo
+tsconfig.tsbuildinfo

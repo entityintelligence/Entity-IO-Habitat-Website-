@@ -2,6 +2,7 @@ import { appendWaitlist, waitingCount } from "@/lib/wait-count";
 import { NextResponse } from "next/server";
 
 const SEATS = new Set(["design-partner", "waitlist"]);
+const INBOX = "hello@entityintelligence.io";
 
 type Payload = {
   name?: string;
@@ -38,7 +39,10 @@ export async function POST(request: Request) {
   }
 
   const record = {
-    ...body,
+    name: body.name?.trim(),
+    email: body.email?.trim(),
+    company: body.company?.trim(),
+    seat: body.seat,
     receivedAt: new Date().toISOString(),
   };
 
@@ -49,9 +53,8 @@ export async function POST(request: Request) {
   }
 
   const key = process.env.RESEND_API_KEY;
-  const to = process.env.WAITLIST_TO ?? "accounts@entityintelligence.io";
-
   if (key) {
+    const to = process.env.WAITLIST_TO ?? INBOX;
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -59,18 +62,22 @@ export async function POST(request: Request) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: process.env.WAITLIST_FROM ?? "KIT Waitlist <hello@entityintelligence.io>",
+        from: process.env.WAITLIST_FROM ?? `KIT Enquiries <${INBOX}>`,
         to: [to],
-        subject: `Seat: ${body.company} (${body.seat})`,
-        text: Object.entries(record)
-          .map(([k, v]) => `${k}: ${v}`)
-          .join("\n"),
+        reply_to: record.email,
+        subject: `Enquiry: ${record.company} (${record.seat})`,
+        text: [
+          `Name: ${record.name}`,
+          `Email: ${record.email}`,
+          `Entity: ${record.company}`,
+          `Seat: ${record.seat}`,
+          `Received: ${record.receivedAt}`,
+        ].join("\n"),
       }),
     });
 
     if (!res.ok) {
-      const detail = await res.text();
-      return NextResponse.json({ error: "Could not send email.", detail }, { status: 502 });
+      return NextResponse.json({ error: "Could not send email." }, { status: 502 });
     }
   }
 

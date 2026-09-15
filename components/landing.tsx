@@ -194,12 +194,12 @@ function LandingHead({
               onHome();
             }}
           >
-            ENTITY ICT
+            ENTITY IO
           </Link>
         </div>
         <nav className="head-rail">
           <Link
-            href="/join"
+            href="/?enroll=1"
             className="head-link"
             onClick={(event) => {
               event.preventDefault();

@@ -3,24 +3,39 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 export const places = [
-  { id: "local", label: "Local", zone: null },
   { id: "sydney", label: "Sydney", zone: "Australia/Sydney" },
   { id: "melbourne", label: "Melbourne", zone: "Australia/Melbourne" },
+  { id: "brisbane", label: "Brisbane", zone: "Australia/Brisbane" },
   { id: "perth", label: "Perth", zone: "Australia/Perth" },
+  { id: "adelaide", label: "Adelaide", zone: "Australia/Adelaide" },
+  { id: "auckland", label: "Auckland", zone: "Pacific/Auckland" },
+  { id: "wellington", label: "Wellington", zone: "Pacific/Auckland" },
   { id: "singapore", label: "Singapore", zone: "Asia/Singapore" },
   { id: "london", label: "London", zone: "Europe/London" },
+  { id: "manchester", label: "Manchester", zone: "Europe/London" },
+  { id: "edinburgh", label: "Edinburgh", zone: "Europe/London" },
+  { id: "dublin", label: "Dublin", zone: "Europe/Dublin" },
   { id: "new-york", label: "New York", zone: "America/New_York" },
+  { id: "los-angeles", label: "Los Angeles", zone: "America/Los_Angeles" },
+  { id: "chicago", label: "Chicago", zone: "America/Chicago" },
+  { id: "san-francisco", label: "San Francisco", zone: "America/Los_Angeles" },
+  { id: "toronto", label: "Toronto", zone: "America/Toronto" },
+  { id: "vancouver", label: "Vancouver", zone: "America/Vancouver" },
+  { id: "johannesburg", label: "Johannesburg", zone: "Africa/Johannesburg" },
+  { id: "cape-town", label: "Cape Town", zone: "Africa/Johannesburg" },
 ] as const;
 
 export type PlaceId = (typeof places)[number]["id"];
 
+const DEFAULT_PLACE: PlaceId = "sydney";
+
 const PlaceContext = createContext<{
   place: PlaceId;
-  zone: string | null;
+  zone: string;
   setPlace: (id: PlaceId) => void;
 }>({
-  place: "local",
-  zone: null,
+  place: DEFAULT_PLACE,
+  zone: "Australia/Sydney",
   setPlace: () => undefined,
 });
 
@@ -33,7 +48,7 @@ function apply(id: PlaceId) {
 }
 
 export function PlaceProvider({ children }: { children: React.ReactNode }) {
-  const [place, setPlaceState] = useState<PlaceId>("local");
+  const [place, setPlaceState] = useState<PlaceId>(DEFAULT_PLACE);
 
   useEffect(() => {
     try {
@@ -44,7 +59,7 @@ export function PlaceProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const zone = places.find((item) => item.id === place)?.zone ?? null;
+  const zone = places.find((item) => item.id === place)?.zone ?? places[0].zone;
 
   const value = useMemo(
     () => ({
@@ -87,7 +102,7 @@ export function PlaceToggle() {
     };
   }, [open]);
 
-  const current = places.find((item) => item.id === place)?.label ?? "Local";
+  const current = places.find((item) => item.id === place)?.label ?? places[0].label;
 
   return (
     <div className="head-place" ref={rootRef} data-open={open ? "" : undefined}>

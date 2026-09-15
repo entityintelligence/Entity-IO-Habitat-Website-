@@ -3,14 +3,14 @@
 import { useEffect, useState } from "react";
 import { usePlace } from "@/components/place";
 
-export function readClock(zone: string | null) {
+export function readClock(zone: string) {
   const parts = new Intl.DateTimeFormat("en-GB", {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
     hour12: false,
     hourCycle: "h23",
-    timeZone: zone ?? undefined,
+    timeZone: zone,
   }).formatToParts(new Date());
   const get = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)?.value ?? "00";
   return `${get("hour")}:${get("minute")}.${get("second")}`;
@@ -31,7 +31,7 @@ export function TimeRead() {
   }, [zone]);
 
   return (
-    <time className="land-time" dateTime={now.replace(".", ":")} aria-label="Local time" suppressHydrationWarning>
+    <time className="land-time" dateTime={now.replace(".", ":")} aria-label="Time" suppressHydrationWarning>
       {now}
     </time>
   );

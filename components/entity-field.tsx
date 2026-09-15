@@ -121,35 +121,7 @@ const ASK_MILES: MileAt[] = [
   { col: 4, row: 18, label: "L18–C05", name: "Stewardship", run: 4 },
 ];
 const MILESTONES: MileAt[] = [...PATH_LEGS.map((leg) => leg.mile), ...ASK_MILES];
-const SWAP_MS = 640;
-const SWAP_BEAT = 880;
-const SWAP_WAIT = 720;
-const SWAP_PAIRS = 3;
 const DBL_MS = 320;
-const SWAP_LOCK = new Set<string>([
-  "3,1",
-  "4,7",
-  "3,11",
-  "4,12",
-  "5,12",
-  "5,13",
-  ...PATH_LEGS.flatMap((leg) => [`${leg.mile.col},${leg.mile.row}`, ...leg.tiles.map((tile) => `${tile.col},${tile.row}`)]),
-]);
-const SWAP_POOL: string[] = [
-  ...Array.from({ length: 3 }, (_, row) => Array.from({ length: 7 }, (_, col) => `${col},${row}`)).flat(),
-  ...Array.from({ length: 2 }, (_, n) => {
-    const row = n + 3;
-    return Array.from({ length: 4 }, (_, i) => `${i + 3},${row}`).filter((id) => id !== "6,3");
-  }).flat(),
-  ...Array.from({ length: 2 }, (_, n) => Array.from({ length: 4 }, (_, i) => `${i + 3},${n + 5}`)).flat(),
-  ...Array.from({ length: 7 }, (_, col) => `${col},7`),
-  ...Array.from({ length: 6 }, (_, col) => `${col},8`),
-  ...Array.from({ length: 5 }, (_, n) => Array.from({ length: 4 }, (_, i) => `${i + 3},${n + 9}`))
-    .flat()
-    .filter((id) => id !== "6,13"),
-  ...Array.from({ length: 4 }, (_, n) => Array.from({ length: 3 }, (_, col) => `${col},${n + 9}`)).flat(),
-  ...Array.from({ length: 5 }, (_, n) => Array.from({ length: 4 }, (_, i) => `${i + 3},${n + 14}`)).flat(),
-].filter((id) => !SWAP_LOCK.has(id));
 
 function hubDist(col: number, row: number) {
   return Math.min(
@@ -199,11 +171,6 @@ function CriticalPathHint() {
       </span>
     </span>
   );
-}
-
-function filmFlip(col: number, row: number, now: number) {
-  const delay = 90 + ((col * 19 + row * 37) % 24) * 52;
-  return now >= delay && now < FILM_OUT;
 }
 
 function tileRise(col: number, row: number) {
@@ -337,7 +304,7 @@ export function EntityField({
   const originRef = useRef(0);
   const lastWatchRef = useRef(0);
   const autoRun = useRef(false);
-  const logic = useRef({ go: (_n: number) => undefined as void, field, kitOn: false });
+  const logic = useRef({ go: (n: number) => { void n; }, field, kitOn: false });
   const phaseRef = useRef(offerPhase);
   phaseRef.current = offerPhase;
   const pathRef = useRef(offerPath);
@@ -836,7 +803,7 @@ export function FieldTiles({
   onCover?: (on: boolean) => void;
   showCells?: string[];
 }) {
-  const { cells, entityAt, goal, trail, wave, fore, setFore, go, jump, tap, open, kitOn, route, page, film, filmAt, offer, offerPhase, offerPath, mileShow, boardShift, boardSeat, webOn, hubAt, hubWalk, hubStart, inkShow, inkAt, pickInk, recallHome, restHub, toggleWeb } = useField();
+  const { cells, entityAt, goal, trail, wave, fore, setFore, go, jump, tap, open, kitOn, route, page, film, offer, offerPhase, offerPath, mileShow, boardShift, boardSeat, webOn, hubAt, hubWalk, hubStart, inkShow, inkAt, pickInk, recallHome, restHub, toggleWeb } = useField();
   const lastTap = useRef<{ t: number; i: number } | null>(null);
   const onViewRef = useRef(onView);
   onViewRef.current = onView;
@@ -1050,10 +1017,6 @@ export function FieldTiles({
     event.stopPropagation();
     pickInk(col, row);
     return true;
-  };
-  const sendHub = () => {
-    if (!carouselSeat) return;
-    pickInk(carouselSeat.c, carouselSeat.r);
   };
   const callHome = () => {
     if (!hubStart || recalling) return;

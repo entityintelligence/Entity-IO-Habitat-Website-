@@ -46,9 +46,7 @@ export function ProductRange() {
         : range.habitat
       : read === "technical"
         ? range.engineering
-        : read && read !== "habitat" && read !== "technical"
-          ? read
-          : null;
+        : read;
   const numeral = view ? viewNumeral(view) : null;
   const habitat = Boolean(view && read === "habitat");
 
@@ -66,7 +64,7 @@ export function ProductRange() {
               <TimeRead />
               <span className="head-sep" aria-hidden="true" />
               <Link href="/" className="head-brand">
-                ENTITY ICT
+                ENTITY IO
               </Link>
             </div>
             <nav className="head-rail">
@@ -96,8 +94,8 @@ export function ProductRange() {
                 <div className="land-story-copy">
                   {habitat ? (
                     <p className="land-mid">
-                      <span>{view.aside}</span>
-                      {view.lines.map((line) => (
+                      <span>{range.habitat.aside}</span>
+                      {range.habitat.lines.map((line) => (
                         <span key={line}>{line}</span>
                       ))}
                     </p>

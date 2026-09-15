@@ -56,7 +56,7 @@ export function WaitlistForm({ tone = "paper" }: { tone?: "paper" | "field" }) {
       window.dispatchEvent(new Event("waitlist:join"));
     } catch {
       setStatus("error");
-      setMessage("Network error. Write to accounts@entityintelligence.io.");
+      setMessage("Network error. Write to hello@entityintelligence.io.");
     }
   }
 

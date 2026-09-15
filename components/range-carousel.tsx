@@ -188,7 +188,7 @@ export function RangeCarousel({
       setSnap(false);
       setShift(next);
     });
-    await waitForSlide(track?.querySelector(".range-reel-item"));
+    await waitForSlide(track?.querySelector(".range-reel-item") ?? null);
 
     const after = wrap(headRef.current - next);
     headRef.current = after;
