@@ -226,6 +226,8 @@ html[data-theme="light"] .land-site.split::before {
   --feat-board: calc(var(--feat-cols) * var(--feat-tile) + (var(--feat-cols) - 1) * var(--feat-g));
   --feat-pitch: calc(var(--feat-tile) + var(--feat-g));
   --board-y0: calc(var(--view) / 2 - 0.35in + var(--field-nudge, 0px) - (3 * var(--feat-tile) + 2 * var(--feat-g)) / 2);
+  --type-copy: clamp(0.82rem, calc(var(--feat-tile) * 0.09), 1.2rem);
+  --type-title: calc(var(--type-copy) - 2px);
 }
 
 @media (min-width: 105rem) {
@@ -581,7 +583,7 @@ html:not([data-theme="light"]) .land-head .head-brand:hover {
 }
 
 .land-head .head-brand {
-  font-size: calc(clamp(0.95rem, 1.35vw, 1.12rem) - 4px);
+  font-size: calc(var(--type-copy) - 4px);
   font-weight: 400;
   letter-spacing: 0.4em;
   line-height: 1.35;
@@ -593,7 +595,7 @@ html:not([data-theme="light"]) .land-head .head-brand:hover {
 }
 
 .land-head .land-time {
-  font-size: calc(clamp(0.95rem, 1.35vw, 1.12rem) - 4px);
+  font-size: calc(var(--type-copy) - 4px);
 }
 
 .land-head .head-sep {
@@ -632,7 +634,7 @@ html:not([data-theme="light"]) .land-head .head-sep {
   gap: 0;
   margin: 0;
   font-family: var(--font-plex), "IBM Plex Sans KR", "Helvetica Neue", sans-serif;
-  font-size: calc(clamp(0.95rem, 1.35vw, 1.12rem) - 2px);
+  font-size: var(--type-title);
   font-weight: 400;
   line-height: 1.35;
   text-align: left;
@@ -1083,7 +1085,7 @@ html[data-theme="light"] .feat-tile[data-film="1"][data-rise="-1"] {
   justify-content: center;
   padding: 0.7rem 0.85rem;
   font-family: var(--font-plex), "IBM Plex Sans KR", "Helvetica Neue", sans-serif;
-  font-size: calc(clamp(0.82rem, 1.15vw, 0.98rem) - 1px);
+  font-size: var(--type-title);
   font-weight: 400;
   letter-spacing: 0.08em;
   line-height: 1.3;
@@ -1311,8 +1313,8 @@ html:not([data-theme="light"]) .feat-path-corner {
   z-index: 2;
   box-sizing: border-box;
   display: block;
-  width: min(3.45rem, 42%);
-  height: min(3.45rem, 42%);
+  width: calc(var(--feat-tile) * 0.46);
+  height: calc(var(--feat-tile) * 0.46);
   overflow: visible;
   pointer-events: none;
   transform: translate(-50%, -50%);
@@ -1704,7 +1706,7 @@ html:not([data-theme="light"]) .feat-tile h2.land-hero-ink {
   visibility: hidden;
   margin: 0 0 3rem;
   font-family: var(--font-plex), "IBM Plex Sans KR", "Helvetica Neue", sans-serif;
-  font-size: calc(clamp(0.95rem, 1.35vw, 1.12rem) - 2px);
+  font-size: calc(var(--type-copy) + 0.04rem);
   font-weight: 400;
   line-height: 1.35;
   white-space: nowrap;
@@ -2578,7 +2580,7 @@ html[data-theme="light"] .range-page .range-reel-slide.is-board {
   margin: 0;
   padding: 0;
   font-family: var(--font-plex), "IBM Plex Sans KR", "Helvetica Neue", sans-serif;
-  font-size: calc(clamp(0.95rem, 1.35vw, 1.12rem) - 2px);
+  font-size: var(--type-title);
   font-weight: 400;
   letter-spacing: 0.12em;
   line-height: 1;
