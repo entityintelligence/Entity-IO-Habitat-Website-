@@ -1681,6 +1681,32 @@ html[data-theme="light"] .feat-tile-pad {
   opacity: 0.48;
 }
 
+.range-page .land-spec[data-habitat="1"] .feat-tile-pad {
+  animation: range-pad-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes range-pad-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.42;
+  }
+}
+
+html[data-theme="light"] .range-page .land-spec[data-habitat="1"] .feat-tile-pad {
+  animation-name: range-pad-in-light;
+}
+
+@keyframes range-pad-in-light {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.48;
+  }
+}
+
 .feat-gap {
   display: flex;
   min-width: 0;
@@ -3781,6 +3807,7 @@ html:not([data-theme="light"]) .land-ask-send:hover:not(:disabled) {
   .land-flick-mark,
   .land-ask-go-mark,
   .land-ask-send,
+  .range-page .land-spec[data-habitat="1"] .feat-tile-pad,
   .range-page .range-reel-arrow .land-flick-mark,
   .range-page .range-reel:not([data-flat="1"]) .range-reel-slide.is-on.is-hab:not(.is-jump),
   .range-page .land-spec .feat-tile[data-epic="1"][data-charge="1"],

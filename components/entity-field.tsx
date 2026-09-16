@@ -1401,11 +1401,11 @@ export function FieldTiles({
           <CriticalPathHint />
         </span>
       ) : null}
-      {gapCol > 0
+      {showPads && gapCol > 0
         ? Array.from({ length: padRows }, (_, row) => (
             <i
               key={`shift-gap-${row}`}
-              className="feat-tile"
+              className="feat-tile feat-tile-pad"
               style={{ gridColumn: gapCol, gridRow: row + 1, pointerEvents: "none" }}
               aria-hidden="true"
             />
