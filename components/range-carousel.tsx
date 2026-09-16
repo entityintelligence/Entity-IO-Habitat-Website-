@@ -85,7 +85,7 @@ function HabitatMark({ spread = false }: { spread?: boolean }) {
     </g>
   );
   return (
-    <svg className="feat-epic-mark" viewBox="0 0 64 64" aria-hidden="true">
+    <svg className="feat-epic-mark" viewBox="0 0 64 64" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
       {arm(-1, "M27 11 L13 22 L13 42 L27 53")}
       {arm(1, "M37 11 L51 22 L51 42 L37 53")}
     </svg>

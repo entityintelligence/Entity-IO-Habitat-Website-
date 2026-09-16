@@ -742,7 +742,7 @@ export function EntityField({
 
 function EpicMark({ ink = false }: { ink?: boolean }) {
   return (
-    <svg className={`feat-epic-mark${ink ? " is-ink" : ""}`} viewBox="0 0 64 64" aria-hidden="true">
+    <svg className={`feat-epic-mark${ink ? " is-ink" : ""}`} viewBox="0 0 64 64" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
       {ink ? (
         <>
           <path d="M27 11 L13 22 L13 42 L27 53" transform="translate(-3.5 0)" />

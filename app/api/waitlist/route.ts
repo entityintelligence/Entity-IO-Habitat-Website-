@@ -55,29 +55,36 @@ export async function POST(request: Request) {
   const key = process.env.RESEND_API_KEY;
   if (key) {
     const to = process.env.WAITLIST_TO ?? INBOX;
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${key}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: process.env.WAITLIST_FROM ?? `KIT Enquiries <${INBOX}>`,
-        to: [to],
-        reply_to: record.email,
-        subject: `Enquiry: ${record.company} (${record.seat})`,
-        text: [
-          `Name: ${record.name}`,
-          `Email: ${record.email}`,
-          `Entity: ${record.company}`,
-          `Seat: ${record.seat}`,
-          `Received: ${record.receivedAt}`,
-        ].join("\n"),
-      }),
-    });
-
-    if (!res.ok) {
-      return NextResponse.json({ error: "Could not send email." }, { status: 502 });
+    const froms = [process.env.WAITLIST_FROM, `Entity IO <onboarding@resend.dev>`].filter(
+      (value, index, list): value is string => Boolean(value) && list.indexOf(value) === index,
+    );
+    try {
+      for (const from of froms) {
+        const res = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${key}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            from,
+            to: [to],
+            reply_to: record.email,
+            subject: `Enquiry: ${record.company} (${record.seat})`,
+            text: [
+              `Name: ${record.name}`,
+              `Email: ${record.email}`,
+              `Entity: ${record.company}`,
+              `Seat: ${record.seat}`,
+              `Received: ${record.receivedAt}`,
+            ].join("\n"),
+          }),
+        });
+        if (res.ok) break;
+        await res.text();
+      }
+    } catch {
+      // Email is best-effort; the enquiry is still accepted.
     }
   }
 

@@ -33,10 +33,13 @@ export function WaitlistForm({ tone = "paper" }: { tone?: "paper" | "field" }) {
       return;
     }
     setStatus("submitting");
-    const data = Object.fromEntries(new FormData(form).entries()) as Record<string, string>;
-    if (!data.name?.trim()) {
-      data.name = (data.email ?? "").split("@")[0] || "Enquire";
-    }
+    const fields = Object.fromEntries(new FormData(form).entries()) as Record<string, string>;
+    const data = {
+      name: (fields.name ?? "").trim() || (fields.email ?? "").split("@")[0] || "Enquire",
+      email: (fields.email ?? "").trim(),
+      company: (fields.company ?? "").trim(),
+      seat,
+    };
 
     try {
       const res = await fetch("/api/waitlist", {
@@ -44,10 +47,15 @@ export function WaitlistForm({ tone = "paper" }: { tone?: "paper" | "field" }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      const json = (await res.json()) as { ok?: boolean; error?: string; waiting?: number };
+      let json: { ok?: boolean; error?: string; waiting?: number } = {};
+      try {
+        json = JSON.parse(await res.text()) as typeof json;
+      } catch {
+        json = {};
+      }
       if (!res.ok) {
         setStatus("error");
-        setMessage(json.error ?? "Something went wrong.");
+        setMessage(json.error ?? "Could not send. Write to hello@entityintelligence.io.");
         return;
       }
       if (typeof json.waiting === "number") setWaiting(json.waiting);
@@ -56,7 +64,7 @@ export function WaitlistForm({ tone = "paper" }: { tone?: "paper" | "field" }) {
       window.dispatchEvent(new Event("waitlist:join"));
     } catch {
       setStatus("error");
-      setMessage("Network error. Write to hello@entityintelligence.io.");
+      setMessage("Could not reach the desk. Write to hello@entityintelligence.io.");
     }
   }
 

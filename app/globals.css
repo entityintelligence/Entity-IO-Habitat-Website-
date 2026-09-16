@@ -218,7 +218,12 @@ html[data-theme="light"] .land-site.split::before {
   --spine: 1.85rem;
   --rail-inset: 3.85rem;
   --feat-g: 1rem;
-  --feat-tile: calc((100vw - 2 * var(--rail-inset) - 6 * var(--feat-g)) / 7);
+  --feat-tile: min(
+    10.5rem,
+    calc((100vw - 2 * var(--rail-inset) - 6 * var(--feat-g)) / 7),
+    calc((var(--view) - 13rem - 2 * var(--feat-g)) / 3)
+  );
+  --feat-board: calc(7 * var(--feat-tile) + 6 * var(--feat-g));
   --feat-pitch: calc(var(--feat-tile) + var(--feat-g));
   --board-y0: calc(var(--view) / 2 - 0.35in + var(--field-nudge, 0px) - (3 * var(--feat-tile) + 2 * var(--feat-g)) / 2);
 }
@@ -790,16 +795,22 @@ html:not([data-theme="light"]) .land-head .head-sep {
 
 .feat-join {
   --feat-g: 1rem;
-  --feat-tile: calc((100vw - 2 * var(--rail-inset, 3.85rem) - 6 * var(--feat-g)) / 7);
+  --feat-tile: min(
+    10.5rem,
+    calc((100vw - 2 * var(--rail-inset, 3.85rem) - 6 * var(--feat-g)) / 7),
+    calc((100svh - 13rem - 2 * var(--feat-g)) / 3)
+  );
+  --feat-board: calc(7 * var(--feat-tile) + 6 * var(--feat-g));
   --tile-drop: 0.4rem 0.58rem 1.2rem color-mix(in srgb, #000 42%, transparent);
   --tile-lift: -0.22rem -0.28rem 0.7rem color-mix(in srgb, #fff 7%, transparent);
   --tile-skin: inset 0.12rem 0.16rem 0.42rem color-mix(in srgb, #fff 9%, transparent);
   --tile-sheen: color-mix(in srgb, #fff 8%, transparent);
   position: relative;
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(7, var(--feat-tile));
   grid-auto-rows: var(--feat-tile);
   gap: var(--feat-g);
+  width: var(--feat-board);
   z-index: 2;
   overflow: visible;
   touch-action: none;
@@ -817,7 +828,8 @@ html[data-theme="light"] .feat-join {
 .feat-join-open {
   position: absolute;
   left: var(--rail-inset, 3.85rem);
-  right: var(--rail-inset, 3.85rem);
+  right: auto;
+  width: var(--feat-board);
   top: calc(50% - 0.35in + var(--field-nudge, 0px) + (3 * var(--feat-tile) + 2 * var(--feat-g)) / 2 + var(--feat-g));
   grid-template-rows: repeat(2, var(--feat-tile));
 }
@@ -829,7 +841,8 @@ html[data-theme="light"] .feat-join {
   --tile-sheen: color-mix(in srgb, #fff 8%, transparent);
   position: absolute;
   left: var(--rail-inset, 3.85rem);
-  right: var(--rail-inset, 3.85rem);
+  right: auto;
+  width: var(--feat-board);
   top: calc(50% - 0.35in + var(--field-nudge, 0px));
   z-index: 2;
   transform: translateY(-50%);
@@ -845,7 +858,12 @@ html[data-theme="light"] .feat-board {
 
 .feat-grid {
   --feat-g: 1rem;
-  --feat-tile: calc((100vw - 2 * var(--rail-inset, 3.85rem) - 6 * var(--feat-g)) / 7);
+  --feat-tile: min(
+    10.5rem,
+    calc((100vw - 2 * var(--rail-inset, 3.85rem) - 6 * var(--feat-g)) / 7),
+    calc((100svh - 13rem - 2 * var(--feat-g)) / 3)
+  );
+  --feat-board: calc(7 * var(--feat-tile) + 6 * var(--feat-g));
   position: relative;
   left: auto;
   right: auto;
@@ -853,10 +871,10 @@ html[data-theme="light"] .feat-board {
   z-index: 2;
   display: grid;
   box-sizing: border-box;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(7, var(--feat-tile));
   grid-template-rows: repeat(3, var(--feat-tile));
   gap: var(--feat-g);
-  width: auto;
+  width: var(--feat-board);
   height: auto;
   padding: 0;
   transform: none;
@@ -919,10 +937,10 @@ html[data-theme="light"] .land-spec .feat-tile[data-drag="1"] {
   --tile-sheen: color-mix(in srgb, #fff 8%, transparent);
   display: flex;
   box-sizing: border-box;
-  width: 100%;
+  width: var(--feat-tile);
   height: var(--feat-tile);
   flex: none;
-  min-width: 0;
+  min-width: var(--feat-tile);
   min-height: var(--feat-tile);
   flex-direction: column;
   align-items: stretch;
@@ -1029,6 +1047,8 @@ html[data-theme="light"] .feat-tile[data-film="1"][data-rise="-1"] {
   z-index: 8;
   cursor: pointer;
   pointer-events: auto;
+  padding: 0;
+  overflow: hidden;
   transform: translate(-0.2rem, -0.22rem) translateZ(36px);
 }
 
@@ -1279,12 +1299,17 @@ html:not([data-theme="light"]) .feat-path-corner {
 
 .feat-epic-mark {
   position: absolute;
-  inset: 30%;
+  inset: auto;
+  top: 50%;
+  left: 50%;
   z-index: 2;
-  width: auto;
-  height: auto;
+  box-sizing: border-box;
+  display: block;
+  width: min(3.45rem, 42%);
+  height: min(3.45rem, 42%);
   overflow: visible;
   pointer-events: none;
+  transform: translate(-50%, -50%);
 }
 
 .feat-epic-mark path {
@@ -1349,7 +1374,8 @@ html:not([data-theme="light"]) .feat-epic-face {
   width: var(--feat-tile);
   height: var(--feat-tile);
   min-height: var(--feat-tile);
-  overflow: visible;
+  overflow: hidden;
+  padding: 0;
 }
 
 .land-plot-hold .feat-tile[data-film="1"]:not([data-epic]):not([data-ink]):hover,
@@ -1413,11 +1439,11 @@ html[data-theme="light"] .land-site[data-page="2"] .land-plot-hold .feat-tile[da
 
 @keyframes ink-pop {
   from {
-    transform: scale(0.35);
+    transform: translate(-50%, -50%) scale(0.35);
     opacity: 0;
   }
   to {
-    transform: scale(1);
+    transform: translate(-50%, -50%) scale(1);
     opacity: 1;
   }
 }
@@ -1690,21 +1716,31 @@ html:not([data-theme="light"]) .feat-tile h2.land-hero-ink {
 
 .land-spec-hold {
   --feat-g: 1rem;
-  --feat-tile: calc((100vw - 2 * var(--rail-inset, 3.85rem) - 6 * var(--feat-g)) / 7);
+  --feat-tile: min(
+    10.5rem,
+    calc((100vw - 2 * var(--rail-inset, 3.85rem) - 6 * var(--feat-g)) / 7),
+    calc((100svh - 13rem - 2 * var(--feat-g)) / 3)
+  );
+  --feat-board: calc(7 * var(--feat-tile) + 6 * var(--feat-g));
   --feat-pitch: calc(var(--feat-tile) + var(--feat-g));
   --board-row: 5;
   --board-page: 1;
   position: absolute;
   left: var(--rail-inset, 3.85rem);
   z-index: 3;
-  width: calc(100vw - 2 * var(--rail-inset, 3.85rem));
+  width: var(--feat-board);
   margin: 0;
   top: calc(50% - 0.35in + var(--field-nudge, 0px) - (3 * var(--feat-tile) + 2 * var(--feat-g)) / 2 + var(--board-row) * var(--feat-pitch) - var(--board-page) * 100%);
 }
 
 .land-spec {
   --feat-g: 1rem;
-  --feat-tile: calc((100vw - 2 * var(--rail-inset, 3.85rem) - 6 * var(--feat-g)) / 7);
+  --feat-tile: min(
+    10.5rem,
+    calc((100vw - 2 * var(--rail-inset, 3.85rem) - 6 * var(--feat-g)) / 7),
+    calc((100svh - 13rem - 2 * var(--feat-g)) / 3)
+  );
+  --feat-board: calc(7 * var(--feat-tile) + 6 * var(--feat-g));
   --tile-drop: 0.4rem 0.58rem 1.2rem color-mix(in srgb, #000 42%, transparent);
   --tile-lift: -0.22rem -0.28rem 0.7rem color-mix(in srgb, #fff 7%, transparent);
   --tile-skin: inset 0.12rem 0.16rem 0.42rem color-mix(in srgb, #fff 9%, transparent);
@@ -1712,10 +1748,10 @@ html:not([data-theme="light"]) .feat-tile h2.land-hero-ink {
   position: relative;
   z-index: 3;
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(7, var(--feat-tile));
   grid-template-rows: repeat(4, var(--feat-tile));
   gap: var(--feat-g);
-  width: 100%;
+  width: var(--feat-board);
   max-width: none;
   margin: 0;
   touch-action: none;
@@ -2474,6 +2510,9 @@ html[data-theme="light"] .range-page.land-site[data-page="2"] .land-spec[data-of
   height: var(--feat-tile);
   min-width: var(--feat-tile);
   min-height: var(--feat-tile);
+  padding: 0;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   opacity: 0.72;
   transition:
@@ -2520,10 +2559,11 @@ html[data-theme="light"] .range-page .range-reel-slide.is-board {
   align-items: center;
   justify-content: center;
   margin: 0;
+  padding: 0;
   font-family: var(--font-plex), "IBM Plex Sans KR", "Helvetica Neue", sans-serif;
   font-size: calc(clamp(0.95rem, 1.35vw, 1.12rem) - 2px);
   font-weight: 400;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   line-height: 1;
   text-align: center;
   pointer-events: none;
@@ -2541,6 +2581,8 @@ html[data-theme="light"] .range-page .range-reel-slide.is-board {
   display: block;
   font-weight: 400;
   line-height: 1;
+  letter-spacing: 0.12em;
+  margin-right: -0.12em;
   color: #3a3a3a;
 }
 
@@ -2857,15 +2899,29 @@ html:not([data-theme="light"]) .land-core-kicker .land-hero-live {
   overflow: visible;
 }
 
+.land-seat-stage .land-story-col {
+  width: calc(3 * var(--feat-tile) + 2 * var(--feat-g));
+  max-width: calc(100% - 2.5rem);
+}
+
+.land-seat-stage .land-story-copy {
+  width: 100%;
+  max-width: none;
+}
+
 .land-seat-stage .land-mid,
 .land-seat-stage .land-mid > span {
   text-align-last: left;
 }
 
+.land-seat-stage .land-story .land-mid {
+  max-width: none;
+}
+
 .land-seat-stage .land-ask-form {
-  margin-top: calc(4.85rem + 0.5in);
+  margin-top: 4.15rem;
   width: 100%;
-  max-width: min(calc(38rem - 1in), calc(100% - 2.5rem));
+  max-width: none;
 }
 
 .land-ask-form {
@@ -2886,7 +2942,7 @@ html:not([data-theme="light"]) .land-core-kicker .land-hero-live {
   align-items: baseline;
   gap: 0.55rem;
   margin: 0;
-  padding: 1.1rem 0;
+  padding: 0.95rem 0;
   border: 0;
   border-bottom: 1px solid color-mix(in srgb, var(--fg) 12%, transparent);
   font: inherit;
@@ -2925,7 +2981,7 @@ html:not([data-theme="light"]) .land-ask-key {
   color: var(--fg);
   caret-color: #6226ff;
   font: inherit;
-  letter-spacing: inherit;
+  letter-spacing: 0.08em;
   line-height: inherit;
   outline: none;
 }
@@ -3020,9 +3076,14 @@ html:not([data-theme="light"]) .land-ask-opt[data-on] {
 }
 
 .land-ask-seats {
+  display: block;
   min-width: 0;
   min-inline-size: 0;
-  padding-bottom: 1.85rem;
+  padding-bottom: 1.35rem;
+}
+
+.land-ask-seats .land-ask-pick {
+  display: flex;
 }
 
 .land-ask-ok-line {
@@ -4093,6 +4154,7 @@ html[data-theme="light"] .kit-sys-reading:hover span {
   .land-site {
     --spine: 0.85rem;
     --rail-inset: 1.65rem;
+    --feat-g: 0.65rem;
   }
 
   .offer {
