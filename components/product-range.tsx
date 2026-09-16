@@ -5,12 +5,15 @@ import { useState } from "react";
 import { range, rangeNumerals } from "@/content/copy";
 import { PlaceToggle } from "@/components/place";
 import { TimeRead } from "@/components/time-read";
-import { EntityField, FieldTiles } from "@/components/entity-field";
+import { EntityField, FieldTiles, usePadCols } from "@/components/entity-field";
 import type { RangeRead } from "@/components/range-carousel";
 
 const ENROLL = "/?enroll=1";
 const PLOT_CORNER = [{ col: 6, row: 13, zone: "plot" as const }];
+const PLOT_WIDE = [9, 10, 11, 12, 13].map((row) => ({ col: 7, row, zone: "plot" as const }));
+const PLOT_EXTRA_WIDE = [...PLOT_CORNER, ...PLOT_WIDE];
 const PLOT_CAROUSEL = { c: 6, r: 11 };
+const PLOT_CAROUSEL_WIDE = { c: 7, r: 11 };
 const PLOT_GATE = { c: 0, r: 12 };
 const PLOT_KEEP = ["0,12"];
 
@@ -37,6 +40,9 @@ function viewNumeral(view: (typeof range.habitat) | (typeof range.engineering) |
 }
 
 export function ProductRange() {
+  const wide = usePadCols() > 7;
+  const carousel = wide ? PLOT_CAROUSEL_WIDE : PLOT_CAROUSEL;
+  const extra = wide ? PLOT_EXTRA_WIDE : PLOT_CORNER;
   const [read, setRead] = useState<RangeRead | null>("habitat");
   const [cover, setCover] = useState(false);
   const view =
@@ -51,7 +57,7 @@ export function ProductRange() {
   const habitat = Boolean(view && read === "habitat");
 
   return (
-    <EntityField page={2} extraCells={PLOT_CORNER} hubSeat={PLOT_CAROUSEL} hubStart={PLOT_GATE}>
+    <EntityField page={2} extraCells={extra} hubSeat={carousel} hubStart={PLOT_GATE}>
       <div className="split land-site range-page" data-page="2">
         <span className="land-spine" aria-hidden="true" />
         <header className="land-head">
@@ -127,7 +133,7 @@ export function ProductRange() {
               zones={["plot"]}
               className="land-spec"
               loneEpic
-              carouselSeat={PLOT_CAROUSEL}
+              carouselSeat={carousel}
               showCells={PLOT_KEEP}
               onView={setRead}
               onCover={setCover}

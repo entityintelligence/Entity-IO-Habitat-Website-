@@ -95,34 +95,9 @@ const PATH_LEGS: { mile: MileAt; tiles: PathAt[] }[] = [
 const PATH_CELL = new Map(PATH_LEGS.flatMap((leg) => leg.tiles.map((tile) => [`${tile.col},${tile.row}`, tile] as const)));
 const HUB_HOME = { c: 4, r: 7 };
 const HUB_DEST = { c: 3, r: 11 };
-type Seat = { c: number; r: number; viaGap?: boolean };
-const GAP_HOP = -8;
+type Seat = { c: number; r: number };
 function isHub(col: number, row: number, hop = HUB_HOME) {
   return (col === 3 && row === 1) || (col === hop.c && row === hop.r);
-}
-function colTrack(col: number, carouselCol: number | undefined, shift: number) {
-  return col + 1 + (carouselCol != null && col === carouselCol ? shift : 0);
-}
-function spliceGapHops(
-  cells: FieldCell[],
-  from: Seat,
-  steps: number[],
-  carouselCol: number | undefined,
-  shift: number,
-) {
-  if (!shift || carouselCol == null || steps.length === 0) return steps;
-  const out: number[] = [];
-  let prev = from.c;
-  for (const idx of steps) {
-    const cell = cells[idx];
-    if (!cell) continue;
-    if (Math.abs(colTrack(cell.col, carouselCol, shift) - colTrack(prev, carouselCol, shift)) > 1) {
-      out.push(GAP_HOP);
-    }
-    out.push(idx);
-    prev = cell.col;
-  }
-  return out;
 }
 function isInkMark(col: number, row: number, at: Seat | null) {
   return !!at && col === at.c && row === at.r;
@@ -670,39 +645,27 @@ export function EntityField({
       const recorded = voyageRef.current.length
         ? voyageRef.current
         : hubStart
-          ? spliceGapHops(
-              field.cells,
-              hubStart,
-              hubSteps(field.cells, hubStart, page, park, park),
-              hubSeat?.c,
-              hubSeat && padCols > 7 ? 1 : 0,
-            )
+          ? hubSteps(field.cells, hubStart, page, park, park)
           : [];
       const start = hubStart ? field.cells.findIndex((cell) => cell.col === hubStart.c && cell.row === hubStart.r) : -1;
       const back = [...recorded].reverse().slice(1);
       if (start >= 0) back.push(start);
       leaveRef.current = true;
-      const first = back[0];
-      if (first === GAP_HOP) {
-        setHubAt({ c: at.c, r: at.r, viaGap: true });
-      } else {
-        const cell = first != null ? field.cells[first] : null;
-        if (cell) setHubAt({ c: cell.col, r: cell.row });
-      }
+      const cell = back[0] != null ? field.cells[back[0]] : null;
+      if (cell) setHubAt({ c: cell.col, r: cell.row });
       setHubTrail(back.slice(1));
       return;
     }
-    const raw = hubSteps(field.cells, at, page, inkAt, park);
-    const steps = spliceGapHops(field.cells, at, raw, hubSeat?.c, hubSeat && padCols > 7 ? 1 : 0);
+    const steps = hubSteps(field.cells, at, page, inkAt, park);
     if (hubStart && inkAt && inkAt.c === park.c && inkAt.r === park.r) {
       voyageRef.current = steps;
     }
     setHubTrail(steps);
-  }, [page, inkAt, field.cells, park, hubSeat, hubStart, padCols]);
+  }, [page, inkAt, field.cells, park, hubStart]);
 
   useEffect(() => {
     if (!inkShow || !inkAt) return;
-    if (hubAt.viaGap || hubAt.c !== inkAt.c || hubAt.r !== inkAt.r || hubTrail.length > 0) return;
+    if (hubAt.c !== inkAt.c || hubAt.r !== inkAt.r || hubTrail.length > 0) return;
     const id = window.setTimeout(() => setInkShow(false), 2200);
     return () => window.clearTimeout(id);
   }, [inkShow, inkAt, hubAt, hubTrail.length]);
@@ -715,13 +678,8 @@ export function EntityField({
     const wait = slow ? LEAVE_MS : STEP_MS;
     const id = window.setTimeout(() => {
       const [head, ...rest] = hubTrail;
-      if (head === GAP_HOP) {
-        const here = hubAtRef.current;
-        setHubAt({ c: here.c, r: here.r, viaGap: true });
-      } else {
-        const cell = field.cells[head];
-        if (cell) setHubAt({ c: cell.col, r: cell.row });
-      }
+      const cell = field.cells[head];
+      if (cell) setHubAt({ c: cell.col, r: cell.row });
       setHubTrail(rest);
     }, wait);
     return () => window.clearTimeout(id);
@@ -790,7 +748,7 @@ function readPadCols() {
   if (window.matchMedia("(min-width: 105rem)").matches) return 8;
   return 7;
 }
-function usePadCols() {
+export function usePadCols() {
   const [cols, setCols] = useState(readPadCols);
   useEffect(() => {
     const apply = () => setCols(readPadCols());
@@ -865,9 +823,7 @@ export function FieldTiles({
   showCells?: string[];
 }) {
   const { cells, entityAt, goal, trail, wave, fore, setFore, go, jump, tap, open, kitOn, route, page, film, offer, offerPhase, offerPath, mileShow, boardShift, boardSeat, webOn, hubAt, hubWalk, hubStart, padCols, inkShow, inkAt, pickInk, recallHome, restHub } = useField();
-  const seatShift = carouselSeat && padCols > 7 ? 1 : 0;
-  const track = (col: number) => colTrack(col, carouselSeat?.c, seatShift);
-  const gapCol = carouselSeat && seatShift ? track(carouselSeat.c) - 1 : 0;
+  const track = (col: number) => col + 1;
   const lastTap = useRef<{ t: number; i: number } | null>(null);
   const onViewRef = useRef(onView);
   onViewRef.current = onView;
@@ -885,9 +841,7 @@ export function FieldTiles({
   const [recalling, setRecalling] = useState(false);
   const habitatOn = Boolean(carouselSeat && coverOn);
   const reelFlat = Boolean(carouselSeat && play && rangeRead === "habitat");
-  const hubOnCarousel = Boolean(
-    carouselSeat && !hubAt.viaGap && hubAt.c === carouselSeat.c && hubAt.r === carouselSeat.r,
-  );
+  const hubOnCarousel = Boolean(carouselSeat && hubAt.c === carouselSeat.c && hubAt.r === carouselSeat.r);
   const boardOut = docked || hubOnCarousel;
   const showPads = !carouselSeat || hubOnCarousel;
   const charged = Boolean(carouselSeat && !hubWalk && !recalling && (!docked || hubOnCarousel));
@@ -1006,7 +960,7 @@ export function FieldTiles({
   }, [carouselSeat, rangeRead, play, restHub]);
   useEffect(() => {
     if (!carouselSeat || !play) return;
-    const here = !hubAt.viaGap && hubAt.c === carouselSeat.c && hubAt.r === carouselSeat.r;
+    const here = hubAt.c === carouselSeat.c && hubAt.r === carouselSeat.r;
     if (!here) {
       setAway(true);
       return;
@@ -1167,7 +1121,7 @@ export function FieldTiles({
           ["--dr" as string]: shove?.dr ?? 0,
         };
         const home: CSSProperties = {
-          gridColumn: hubAt.viaGap && gapCol > 0 && isHub(cell.col, cell.row, hubAt) ? gapCol : track(cell.col),
+          gridColumn: track(cell.col),
           gridRow: Number.isFinite(minRow) ? cell.row - minRow + 1 : 1,
           ["--push" as string]: hubDist(cell.col, cell.row),
           ["--col" as string]: cell.col,
@@ -1447,16 +1401,6 @@ export function FieldTiles({
           <CriticalPathHint />
         </span>
       ) : null}
-      {showPads && gapCol > 0
-        ? Array.from({ length: padRows }, (_, row) => (
-            <i
-              key={`shift-gap-${row}`}
-              className="feat-tile feat-tile-pad"
-              style={{ gridColumn: gapCol, gridRow: row + 1, pointerEvents: "none" }}
-              aria-hidden="true"
-            />
-          ))
-        : null}
       {showPads
         ? Array.from({ length: Math.max(0, padCols - 7) * padRows }, (_, index) => {
             const extra = Math.floor(index / Math.max(padRows, 1));
