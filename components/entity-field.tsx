@@ -823,6 +823,7 @@ export function FieldTiles({
   const padCols = cols;
   const seatShift = carouselSeat && padCols > 7 ? 1 : 0;
   const track = (col: number) => col + 1 + (carouselSeat && col === carouselSeat.c ? seatShift : 0);
+  const gapCol = carouselSeat && seatShift ? track(carouselSeat.c) - 1 : 0;
   const lastTap = useRef<{ t: number; i: number } | null>(null);
   const onViewRef = useRef(onView);
   onViewRef.current = onView;
@@ -1400,6 +1401,16 @@ export function FieldTiles({
           <CriticalPathHint />
         </span>
       ) : null}
+      {gapCol > 0
+        ? Array.from({ length: padRows }, (_, row) => (
+            <i
+              key={`shift-gap-${row}`}
+              className="feat-tile"
+              style={{ gridColumn: gapCol, gridRow: row + 1, pointerEvents: "none" }}
+              aria-hidden="true"
+            />
+          ))
+        : null}
       {showPads
         ? Array.from({ length: Math.max(0, padCols - 7) * padRows }, (_, index) => {
             const extra = Math.floor(index / Math.max(padRows, 1));
