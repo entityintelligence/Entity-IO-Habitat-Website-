@@ -1620,6 +1620,14 @@ html[data-theme="light"] .land-spec .feat-tile[data-end="1"] {
 .feat-tile-pad {
   pointer-events: none;
   cursor: default;
+  opacity: 0.14;
+  box-shadow:
+    0.18rem 0.22rem 0.55rem color-mix(in srgb, var(--fg) 5%, transparent),
+    -0.12rem -0.14rem 0.4rem color-mix(in srgb, #fff 28%, transparent);
+}
+
+html[data-theme="light"] .feat-tile-pad {
+  opacity: 0.18;
 }
 
 .feat-gap {
@@ -2925,16 +2933,16 @@ html:not([data-theme="light"]) .land-core-kicker .land-hero-live {
 }
 
 .land-seat-stage .land-story .land-mid::after {
-  content: none;
+  content: "";
 }
 
 .land-seat-stage .land-ask-form,
 .land-seat-stage .land-ask-ok {
-  margin-top: auto;
+  margin-top: 4.15rem;
   padding-top: 0;
   width: 100%;
   max-width: none;
-  border-top: 1px solid color-mix(in srgb, var(--fg) 12%, transparent);
+  border-top: 0;
 }
 
 .land-ask-form {

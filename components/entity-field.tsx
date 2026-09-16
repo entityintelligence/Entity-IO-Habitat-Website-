@@ -818,7 +818,7 @@ export function FieldTiles({
   onCover?: (on: boolean) => void;
   showCells?: string[];
 }) {
-  const { cells, entityAt, goal, trail, wave, fore, setFore, go, jump, tap, open, kitOn, route, page, film, offer, offerPhase, offerPath, mileShow, boardShift, boardSeat, webOn, hubAt, hubWalk, hubStart, inkShow, inkAt, pickInk, recallHome, restHub, toggleWeb } = useField();
+  const { cells, entityAt, goal, trail, wave, fore, setFore, go, jump, tap, open, kitOn, route, page, film, offer, offerPhase, offerPath, mileShow, boardShift, boardSeat, webOn, hubAt, hubWalk, hubStart, inkShow, inkAt, pickInk, recallHome, restHub } = useField();
   const cols = usePadCols();
   const padCols = carouselSeat ? 7 : cols;
   const lastTap = useRef<{ t: number; i: number } | null>(null);
@@ -1150,8 +1150,7 @@ export function FieldTiles({
                 data-charge={charged ? "1" : undefined}
                 data-flash={charged && flash ? "1" : undefined}
                 data-ink-under={overInk ? "1" : undefined}
-                aria-label={carouselSeat ? "Explore the product" : loneEpic ? (boardOn ? "Rest board" : "Habitat") : webOn ? "Hide modules" : "Show modules"}
-                aria-pressed={loneEpic ? boardOn : webOn}
+                aria-label={carouselSeat ? "Explore the product" : loneEpic ? (boardOn ? "Rest board" : "Habitat") : "Habitat"}
                 tabIndex={0}
                 onPointerDown={(event) => {
                   if (event.button !== 0) return;
@@ -1170,7 +1169,6 @@ export function FieldTiles({
                   if (aimInk(event, cell.col, cell.row)) return;
                   event.preventDefault();
                   event.stopPropagation();
-                  toggleWeb();
                 }}
               >
                 {overInk ? <EpicMark ink /> : null}
@@ -1402,11 +1400,13 @@ export function FieldTiles({
       {Array.from({ length: Math.max(0, padCols - 7) * padRows }, (_, index) => {
         const extra = Math.floor(index / Math.max(padRows, 1));
         const row = index % Math.max(padRows, 1);
+        const col = 8 + extra;
+        if (row === padRows - 1 && col === padCols) return null;
         return (
           <i
             key={`pad-${extra}-${row}`}
             className="feat-tile feat-tile-pad"
-            style={{ gridColumn: 8 + extra, gridRow: row + 1 }}
+            style={{ gridColumn: col, gridRow: row + 1 }}
             aria-hidden="true"
           />
         );

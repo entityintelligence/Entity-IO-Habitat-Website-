@@ -35,6 +35,7 @@ export function buildField() {
   for (let row = 3; row <= 4; row += 1) {
     for (let col = 3; col <= 6; col += 1) {
       if (row === 3 && col === 6) continue;
+      if (row === 4 && col === 6) continue;
       pushCell(cells, col, row, "join");
     }
   }
