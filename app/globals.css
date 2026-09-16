@@ -1045,7 +1045,7 @@ html[data-theme="light"] .feat-tile[data-film="1"][data-rise="-1"] {
 
 .feat-tile[data-epic="1"] {
   z-index: 8;
-  cursor: default;
+  cursor: pointer;
   pointer-events: auto;
   padding: 0;
   overflow: hidden;
@@ -1055,6 +1055,11 @@ html[data-theme="light"] .feat-tile[data-film="1"][data-rise="-1"] {
 .land-plot-hold .feat-tile[data-epic="1"],
 .land-site[data-page="2"] .feat-tile[data-epic="1"] {
   transform: none;
+}
+
+.land-site:not(.range-page) .land-open .feat-tile[data-epic="1"],
+.land-site:not(.range-page) .land-story:not(.land-plot-stage):not(.land-seat-stage) .feat-tile[data-epic="1"] {
+  cursor: default;
 }
 
 .land-plot-stage .land-spec {
@@ -2343,7 +2348,7 @@ html[data-theme="light"] .range-page.land-site[data-page="2"] .land-spec[data-of
 
 .range-page .land-spec[data-habitat="1"] .feat-tile[data-film="1"][data-epic="1"],
 .range-page .land-spec .feat-tile[data-epic="1"] {
-  cursor: default;
+  cursor: pointer;
 }
 
 .range-page .land-spec .feat-tile[data-ink="1"],
@@ -2531,7 +2536,7 @@ html[data-theme="light"] .range-page.land-site[data-page="2"] .land-spec[data-of
 }
 
 .range-page .range-reel-slide.is-hab {
-  cursor: default;
+  cursor: pointer;
 }
 
 html[data-theme="light"] .range-page .range-reel-slide {

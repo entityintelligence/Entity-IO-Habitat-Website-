@@ -22,6 +22,57 @@ function valid(body: Payload) {
   );
 }
 
+function fromAddresses() {
+  const listed = [process.env.WAITLIST_FROM, `Entity IO <${INBOX}>`, "Entity IO <onboarding@resend.dev>"];
+  return listed.filter((value, index, list): value is string => Boolean(value) && list.indexOf(value) === index);
+}
+
+async function sendEnquiry(record: {
+  name?: string;
+  email?: string;
+  company?: string;
+  seat?: string;
+  receivedAt: string;
+}) {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) {
+    throw new Error("Mail is not configured.");
+  }
+
+  const to = INBOX;
+  const text = [
+    `Name: ${record.name}`,
+    `Email: ${record.email}`,
+    `Entity: ${record.company}`,
+    `Seat: ${record.seat}`,
+    `Received: ${record.receivedAt}`,
+  ].join("\n");
+  let last = "Could not send email.";
+
+  for (const from of fromAddresses()) {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from,
+        to: [to],
+        reply_to: record.email,
+        subject: `Enquiry: ${record.company} (${record.seat})`,
+        text,
+      }),
+    });
+    const body = await res.text();
+    if (res.ok) return;
+    last = body.slice(0, 400) || last;
+    console.error("waitlist mail failed", res.status, from, last);
+  }
+
+  throw new Error(last);
+}
+
 export async function GET() {
   return NextResponse.json({ waiting: await waitingCount() });
 }
@@ -52,40 +103,11 @@ export async function POST(request: Request) {
     // Count file is best-effort on read-only hosts.
   }
 
-  const key = process.env.RESEND_API_KEY;
-  if (key) {
-    const to = process.env.WAITLIST_TO ?? INBOX;
-    const froms = [process.env.WAITLIST_FROM, `Entity IO <onboarding@resend.dev>`].filter(
-      (value, index, list): value is string => Boolean(value) && list.indexOf(value) === index,
-    );
-    try {
-      for (const from of froms) {
-        const res = await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${key}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            from,
-            to: [to],
-            reply_to: record.email,
-            subject: `Enquiry: ${record.company} (${record.seat})`,
-            text: [
-              `Name: ${record.name}`,
-              `Email: ${record.email}`,
-              `Entity: ${record.company}`,
-              `Seat: ${record.seat}`,
-              `Received: ${record.receivedAt}`,
-            ].join("\n"),
-          }),
-        });
-        if (res.ok) break;
-        await res.text();
-      }
-    } catch {
-      // Email is best-effort; the enquiry is still accepted.
-    }
+  try {
+    await sendEnquiry(record);
+  } catch (error) {
+    console.error("waitlist mail error", error instanceof Error ? error.message : error);
+    return NextResponse.json({ error: "Could not send. Write to hello@entityintelligence.io." }, { status: 502 });
   }
 
   return NextResponse.json({ ok: true, waiting: await waitingCount() });

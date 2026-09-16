@@ -93,7 +93,7 @@ const PATH_LEGS: { mile: MileAt; tiles: PathAt[] }[] = [
   },
 ];
 const PATH_CELL = new Map(PATH_LEGS.flatMap((leg) => leg.tiles.map((tile) => [`${tile.col},${tile.row}`, tile] as const)));
-const HUB_HOME = { c: 4, r: 7 };
+const HUB_HOME = { c: 3, r: 7 };
 const HUB_DEST = { c: 3, r: 11 };
 type Seat = { c: number; r: number };
 function isHub(col: number, row: number, hop = HUB_HOME) {
@@ -126,7 +126,7 @@ const DBL_MS = 320;
 function hubDist(col: number, row: number) {
   return Math.min(
     Math.abs(col - 3) + Math.abs(row - 1),
-    Math.abs(col - 4) + Math.abs(row - 7),
+    Math.abs(col - 3) + Math.abs(row - 7),
     Math.abs(col - 3) + Math.abs(row - 11),
   );
 }
@@ -145,7 +145,7 @@ type OfferPhase = "idle" | "jump" | "grow" | "play" | "stack" | "shrink" | "home
 type OfferWeb = "off" | "dist" | "in" | "make" | "proj";
 
 function pathHit(col: number, row: number, path: PathAt[] | null) {
-  if ((col === 3 && row === 1) || (col === 4 && row === 7) || !path) return null;
+  if ((col === 3 && row === 1) || (col === 3 && row === 7) || !path) return null;
   return path.find((item) => item.col === col && item.row === row) ?? null;
 }
 
@@ -821,13 +821,8 @@ export function FieldTiles({
   const { cells, entityAt, goal, trail, wave, fore, setFore, go, jump, tap, open, kitOn, route, page, film, offer, offerPhase, offerPath, mileShow, boardShift, boardSeat, webOn, hubAt, hubWalk, hubStart, inkShow, inkAt, pickInk, recallHome, restHub } = useField();
   const cols = usePadCols();
   const padCols = cols;
-  const pieceShift = (col: number, row: number) => {
-    if (padCols <= 7) return 0;
-    if (carouselSeat && col === carouselSeat.c) return 1;
-    if (!carouselSeat && isHub(col, row, hubAt)) return 1;
-    return 0;
-  };
-  const track = (col: number, row = 0) => col + 1 + pieceShift(col, row);
+  const seatShift = carouselSeat && padCols > 7 ? 1 : 0;
+  const track = (col: number) => col + 1 + (carouselSeat && col === carouselSeat.c ? seatShift : 0);
   const lastTap = useRef<{ t: number; i: number } | null>(null);
   const onViewRef = useRef(onView);
   onViewRef.current = onView;
@@ -1119,13 +1114,13 @@ export function FieldTiles({
         const slot = boardSeat[at] ?? { c: cell.col, r: cell.row };
         const shove = boardShift[at];
         const style: CSSProperties = {
-          gridColumn: track(slot.c, slot.r),
+          gridColumn: track(slot.c),
           gridRow: Number.isFinite(minRow) ? slot.r - minRow + 1 : 1,
           ["--dc" as string]: shove?.dc ?? 0,
           ["--dr" as string]: shove?.dr ?? 0,
         };
         const home: CSSProperties = {
-          gridColumn: track(cell.col, cell.row),
+          gridColumn: track(cell.col),
           gridRow: Number.isFinite(minRow) ? cell.row - minRow + 1 : 1,
           ["--push" as string]: hubDist(cell.col, cell.row),
           ["--col" as string]: cell.col,
@@ -1193,7 +1188,7 @@ export function FieldTiles({
             <RangeCarousel
               key={`${cell.col}-${cell.row}`}
               style={{
-                gridColumn: track(carouselSeat.c, carouselSeat.r),
+                gridColumn: track(carouselSeat.c),
                 gridRow: "1 / -1",
               }}
               at={at}
@@ -1412,7 +1407,7 @@ export function FieldTiles({
             const col = 8 + extra;
             const lastCol = col === padCols;
             if (!carouselSeat && lastCol && (row === padRows - 1 || zones.includes("join"))) return null;
-            if (carouselSeat && col === track(carouselSeat.c, carouselSeat.r)) return null;
+            if (carouselSeat && col === track(carouselSeat.c)) return null;
             return (
               <i
                 key={`pad-${extra}-${row}`}
