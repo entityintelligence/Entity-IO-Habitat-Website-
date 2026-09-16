@@ -1156,6 +1156,11 @@ html[data-theme="light"] .feat-tile[data-film="1"][data-rise="-1"] {
   opacity: 0.14;
 }
 
+.range-page .land-spec[data-offer="1"]:not([data-habitat="1"]) .feat-tile[data-film="1"]:not([data-epic]):not([data-ink]):not([data-mile]):not([data-path]):not([data-carousel]):not(.range-reel-slide),
+.range-page .land-spec[data-offer="1"]:not([data-habitat="1"]) .feat-tile[data-rise]:not([data-epic]):not([data-ink]):not([data-mile]):not([data-path]):not([data-carousel]) {
+  opacity: 1;
+}
+
 .feat-grid[data-offer="1"] > .feat-tile[data-path],
 .feat-join[data-offer="1"] > .feat-tile[data-path],
 .land-spec[data-offer="1"] > .feat-tile[data-path] {
@@ -2155,26 +2160,24 @@ a.land-core-kicker:hover .land-ask-go-mark {
 
 .range-page.land-site[data-page="2"] .land-spec[data-offer="1"]:not([data-board="1"]) .feat-tile[data-film="1"]:not([data-epic]):not([data-carousel]),
 .range-page.land-site[data-page="2"] .land-spec[data-offer="1"]:not([data-board="1"]) .feat-tile[data-film="1"][data-rise]:not([data-epic]):not([data-carousel]) {
-  opacity: 0.22;
+  opacity: 1;
   pointer-events: none;
-  --tile-drop: 0.22rem 0.3rem 0.7rem color-mix(in srgb, #000 22%, transparent);
-  --tile-lift: -0.12rem -0.16rem 0.38rem color-mix(in srgb, #fff 5%, transparent);
 }
 
 html[data-theme="light"] .range-page.land-site[data-page="2"] .land-spec[data-offer="1"]:not([data-board="1"]) .feat-tile[data-film="1"]:not([data-epic]) {
-  --tile-drop: 0.24rem 0.32rem 0.75rem color-mix(in srgb, var(--fg) 6%, transparent);
-  --tile-lift: -0.16rem -0.2rem 0.48rem color-mix(in srgb, #fff 70%, transparent);
+  --tile-drop: 0.42rem 0.6rem 1.2rem color-mix(in srgb, var(--fg) 8%, transparent);
+  --tile-lift: -0.3rem -0.35rem 0.8rem color-mix(in srgb, #fff 82%, transparent);
 }
 
 .range-page .land-spec[data-range="1"]:not([data-habitat="1"]) .feat-tile[data-film="1"][data-col="3"]:not([data-ink]):not([data-epic]),
 .range-page .land-spec[data-range="1"]:not([data-habitat="1"]) .feat-tile[data-film="1"][data-col="4"]:not([data-ink]):not([data-epic]),
 .range-page .land-spec[data-range="1"]:not([data-habitat="1"]) .feat-tile[data-film="1"][data-col="5"]:not([data-ink]):not([data-epic]) {
-  opacity: 0.22;
+  opacity: 1;
   pointer-events: none;
 }
 
 .range-page .land-spec[data-range="1"]:not([data-habitat="1"]) .feat-tile[data-film="1"][data-keep="1"]:not([data-ink]):not([data-epic]) {
-  opacity: 0.22;
+  opacity: 1;
   pointer-events: auto;
   cursor: pointer;
 }
@@ -2183,7 +2186,7 @@ html[data-theme="light"] .range-page.land-site[data-page="2"] .land-spec[data-of
 .range-page .land-spec[data-range="1"][data-board="1"]:not([data-habitat="1"]) .feat-tile[data-film="1"][data-col="4"]:not([data-ink]):not([data-epic]),
 .range-page .land-spec[data-range="1"][data-board="1"]:not([data-habitat="1"]) .feat-tile[data-film="1"][data-col="5"]:not([data-ink]):not([data-epic]),
 .range-page .land-spec[data-range="1"][data-board="1"]:not([data-habitat="1"]) .feat-tile[data-film="1"][data-keep="1"]:not([data-ink]):not([data-epic]) {
-  opacity: 0.4;
+  opacity: 1;
 }
 
 .range-page .land-spec[data-offer="1"] > .feat-tile[data-keep="1"] {
@@ -2191,7 +2194,7 @@ html[data-theme="light"] .range-page.land-site[data-page="2"] .land-spec[data-of
 }
 
 .range-page .land-spec[data-range="1"] .feat-tile[data-film="1"][data-keep="1"]:not([data-epic]) {
-  opacity: 0.22;
+  opacity: 1;
 }
 
 .range-page .land-spec[data-dock="1"]:not([data-habitat="1"]) > .feat-tile[data-film="1"]:not([data-ink]):not([data-epic]) {
