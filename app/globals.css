@@ -1324,8 +1324,8 @@ html:not([data-theme="light"]) .feat-path-corner {
   z-index: 2;
   box-sizing: border-box;
   display: block;
-  width: calc(var(--feat-tile) * 0.28);
-  height: calc(var(--feat-tile) * 0.28);
+  width: calc(var(--feat-tile) * 0.25);
+  height: calc(var(--feat-tile) * 0.25);
   overflow: visible;
   pointer-events: none;
   transform: translate(-50%, -50%);
