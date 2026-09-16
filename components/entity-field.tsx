@@ -261,22 +261,11 @@ export function EntityField({
   hubStart?: Seat;
   children: ReactNode;
 }) {
-  const padCols = usePadCols();
   const field = useMemo(() => {
     const next = buildField();
-    const extra = extraCells?.length ? extraCells : [];
-    let cells = extra.length ? [...next.cells, ...extra] : next.cells;
-    if (pageLock != null && pageLock >= 2 && padCols > 7) {
-      const more: FieldCell[] = [];
-      for (const cell of cells) {
-        if (cell.col !== 6) continue;
-        if (cells.some((item) => item.col === 7 && item.row === cell.row)) continue;
-        more.push({ ...cell, col: 7 });
-      }
-      if (more.length) cells = [...cells, ...more];
-    }
-    return { ...next, cells };
-  }, [extraCells, pageLock, padCols]);
+    if (!extraCells?.length) return next;
+    return { ...next, cells: [...next.cells, ...extraCells] };
+  }, [extraCells]);
   const [entityAt, setEntityAt] = useState(field.topHome);
   const [goal, setGoal] = useState<number | null>(null);
   const [trail, setTrail] = useState<number[]>([]);
@@ -299,7 +288,7 @@ export function EntityField({
   const [offerPath, setOfferPath] = useState<PathAt[] | null>(null);
   const [mileShow, setMileShow] = useState<string[]>([]);
   const [webOn, setWebOn] = useState(false);
-  const park = hubSeat ? (padCols > 7 ? { c: hubSeat.c + 1, r: hubSeat.r } : hubSeat) : HUB_DEST;
+  const park = hubSeat ?? HUB_DEST;
   const [hubAt, setHubAt] = useState(hubStart ?? (pageLock != null && pageLock >= 2 ? park : HUB_HOME));
   const [hubTrail, setHubTrail] = useState<number[]>([]);
   const [inkShow, setInkShow] = useState(false);
@@ -832,9 +821,9 @@ export function FieldTiles({
   const { cells, entityAt, goal, trail, wave, fore, setFore, go, jump, tap, open, kitOn, route, page, film, offer, offerPhase, offerPath, mileShow, boardShift, boardSeat, webOn, hubAt, hubWalk, hubStart, inkShow, inkAt, pickInk, recallHome, restHub } = useField();
   const cols = usePadCols();
   const padCols = cols;
-  const reel = carouselSeat ? (padCols > 7 ? { c: carouselSeat.c + 1, r: carouselSeat.r } : carouselSeat) : null;
-  const track = (col: number) => col + 1;
-  const boardCols = carouselSeat && padCols > 7 ? 8 : 7;
+  const seatShift = carouselSeat && padCols > 7 ? 1 : 0;
+  const track = (col: number) => col + 1 + (carouselSeat && col === carouselSeat.c ? seatShift : 0);
+  const gapCol = carouselSeat && seatShift ? track(carouselSeat.c) - 1 : 0;
   const lastTap = useRef<{ t: number; i: number } | null>(null);
   const onViewRef = useRef(onView);
   onViewRef.current = onView;
@@ -852,7 +841,7 @@ export function FieldTiles({
   const [recalling, setRecalling] = useState(false);
   const habitatOn = Boolean(carouselSeat && coverOn);
   const reelFlat = Boolean(carouselSeat && play && rangeRead === "habitat");
-  const hubOnCarousel = Boolean(reel && hubAt.c === reel.c && hubAt.r === reel.r);
+  const hubOnCarousel = Boolean(carouselSeat && hubAt.c === carouselSeat.c && hubAt.r === carouselSeat.r);
   const boardOut = docked || hubOnCarousel;
   const showPads = !carouselSeat || hubOnCarousel;
   const charged = Boolean(carouselSeat && !hubWalk && !recalling && (!docked || hubOnCarousel));
@@ -971,13 +960,13 @@ export function FieldTiles({
   }, [carouselSeat, rangeRead, play, restHub]);
   useEffect(() => {
     if (!carouselSeat || !play) return;
-    const here = Boolean(reel && hubAt.c === reel.c && hubAt.r === reel.r);
+    const here = hubAt.c === carouselSeat.c && hubAt.r === carouselSeat.r;
     if (!here) {
       setAway(true);
       return;
     }
     if (!away || hubWalk) return;
-    const home = !inkAt || Boolean(reel && inkAt.c === reel.c && inkAt.r === reel.r);
+    const home = !inkAt || (inkAt.c === carouselSeat.c && inkAt.r === carouselSeat.r);
     if (home) setPlay(false);
   }, [away, carouselSeat, hubAt, hubWalk, inkAt, play]);
   useEffect(() => {
@@ -1150,7 +1139,7 @@ export function FieldTiles({
         if (isHub(cell.col, cell.row, hubAt) && (!carouselSeat || !hubOnCarousel)) {
           const overInk = !carouselSeat && inkShow && isInkMark(cell.col, cell.row, inkAt);
           const leaving = Boolean(
-            recalling && reel && hubAt.c === reel.c && hubAt.r === reel.r + 1,
+            recalling && carouselSeat && hubAt.c === carouselSeat.c && hubAt.r === carouselSeat.r + 1,
           );
           return (
             <span key={`${cell.col}-${cell.row}`} className="range-gate" style={home} data-leave={leaving ? "1" : undefined}>
@@ -1169,10 +1158,10 @@ export function FieldTiles({
                 tabIndex={0}
                 onPointerDown={(event) => {
                   if (event.button !== 0) return;
-                  if (carouselSeat && reel) {
+                  if (carouselSeat) {
                     event.preventDefault();
                     event.stopPropagation();
-                    pickInk(reel.c, reel.r);
+                    pickInk(carouselSeat.c, carouselSeat.r);
                     return;
                   }
                   if (loneEpic) {
@@ -1193,14 +1182,14 @@ export function FieldTiles({
             </span>
           );
         }
-        if (reel && cell.col === reel.c) {
+        if (carouselSeat && cell.col === carouselSeat.c) {
           if (recalling && !hubOnCarousel) return null;
           if (Number.isFinite(minRow) && cell.row !== minRow) return null;
           return (
             <RangeCarousel
               key={`${cell.col}-${cell.row}`}
               style={{
-                gridColumn: track(reel.c),
+                gridColumn: track(carouselSeat.c),
                 gridRow: "1 / -1",
               }}
               at={at}
@@ -1213,7 +1202,7 @@ export function FieldTiles({
               flash={hubOnCarousel && charged && flash}
               onView={takeView}
               onSeat={(slot) => {
-                pickInk(reel.c, reel.r + (slot - RANGE_DISPLAY));
+                pickInk(carouselSeat.c, carouselSeat.r + (slot - RANGE_DISPLAY));
               }}
               onPick={(kind) => {
                 if (kind === "habitat") {
@@ -1221,7 +1210,7 @@ export function FieldTiles({
                     callHome();
                     return;
                   }
-                    pickInk(reel.c, reel.r);
+                  pickInk(carouselSeat.c, carouselSeat.r);
                   return;
                 }
                 if (kind === "technical") return;
@@ -1412,14 +1401,24 @@ export function FieldTiles({
           <CriticalPathHint />
         </span>
       ) : null}
+      {showPads && gapCol > 0
+        ? Array.from({ length: padRows }, (_, row) => (
+            <i
+              key={`shift-gap-${row}`}
+              className="feat-tile feat-tile-pad"
+              style={{ gridColumn: gapCol, gridRow: row + 1, pointerEvents: "none" }}
+              aria-hidden="true"
+            />
+          ))
+        : null}
       {showPads
-        ? Array.from({ length: Math.max(0, padCols - boardCols) * padRows }, (_, index) => {
+        ? Array.from({ length: Math.max(0, padCols - 7) * padRows }, (_, index) => {
             const extra = Math.floor(index / Math.max(padRows, 1));
             const row = index % Math.max(padRows, 1);
-            const col = boardCols + 1 + extra;
+            const col = 8 + extra;
             const lastCol = col === padCols;
             if (!carouselSeat && lastCol && (row === padRows - 1 || zones.includes("join"))) return null;
-            if (reel && col === track(reel.c)) return null;
+            if (carouselSeat && col === track(carouselSeat.c)) return null;
             return (
               <i
                 key={`pad-${extra}-${row}`}
