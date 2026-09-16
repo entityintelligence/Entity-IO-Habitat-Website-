@@ -821,6 +821,8 @@ export function FieldTiles({
   const { cells, entityAt, goal, trail, wave, fore, setFore, go, jump, tap, open, kitOn, route, page, film, offer, offerPhase, offerPath, mileShow, boardShift, boardSeat, webOn, hubAt, hubWalk, hubStart, inkShow, inkAt, pickInk, recallHome, restHub } = useField();
   const cols = usePadCols();
   const padCols = cols;
+  const seatShift = carouselSeat && padCols > 7 ? 1 : 0;
+  const track = (col: number) => col + 1 + (carouselSeat && col === carouselSeat.c ? seatShift : 0);
   const lastTap = useRef<{ t: number; i: number } | null>(null);
   const onViewRef = useRef(onView);
   onViewRef.current = onView;
@@ -1111,13 +1113,13 @@ export function FieldTiles({
         const slot = boardSeat[at] ?? { c: cell.col, r: cell.row };
         const shove = boardShift[at];
         const style: CSSProperties = {
-          gridColumn: slot.c + 1,
+          gridColumn: track(slot.c),
           gridRow: Number.isFinite(minRow) ? slot.r - minRow + 1 : 1,
           ["--dc" as string]: shove?.dc ?? 0,
           ["--dr" as string]: shove?.dr ?? 0,
         };
         const home: CSSProperties = {
-          gridColumn: cell.col + 1,
+          gridColumn: track(cell.col),
           gridRow: Number.isFinite(minRow) ? cell.row - minRow + 1 : 1,
           ["--push" as string]: hubDist(cell.col, cell.row),
           ["--col" as string]: cell.col,
@@ -1185,7 +1187,7 @@ export function FieldTiles({
             <RangeCarousel
               key={`${cell.col}-${cell.row}`}
               style={{
-                gridColumn: carouselSeat.c + 1,
+                gridColumn: track(carouselSeat.c),
                 gridRow: "1 / -1",
               }}
               at={at}
@@ -1402,6 +1404,7 @@ export function FieldTiles({
         const row = index % Math.max(padRows, 1);
         const col = 8 + extra;
         if (!carouselSeat && row === padRows - 1 && col === padCols) return null;
+        if (carouselSeat && col === track(carouselSeat.c)) return null;
         return (
           <i
             key={`pad-${extra}-${row}`}
