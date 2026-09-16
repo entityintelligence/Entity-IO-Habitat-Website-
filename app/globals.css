@@ -1324,8 +1324,9 @@ html:not([data-theme="light"]) .feat-path-corner {
   z-index: 2;
   box-sizing: border-box;
   display: block;
-  width: calc(var(--feat-tile) * 0.24);
-  height: calc(var(--feat-tile) * 0.24);
+  width: 24%;
+  height: 24%;
+  aspect-ratio: 1;
   overflow: visible;
   pointer-events: none;
   transform: translate(-50%, -50%);
@@ -3001,7 +3002,7 @@ html:not([data-theme="light"]) .land-core-kicker .land-hero-live {
 
 .land-ask-row {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 0.55rem;
   margin: 0;
   width: 100%;
@@ -3026,8 +3027,10 @@ html:not([data-theme="light"]) .land-core-kicker .land-hero-live {
 
 .land-ask-key {
   flex: none;
+  display: block;
   color: var(--fg-mute);
   font: inherit;
+  line-height: 1.5;
   white-space: nowrap;
 }
 
@@ -3038,8 +3041,11 @@ html:not([data-theme="light"]) .land-ask-key {
 
 .land-ask-row > input {
   flex: 1 1 auto;
+  appearance: none;
+  -webkit-appearance: none;
   width: auto;
   min-width: 0;
+  height: 1.5em;
   margin: 0;
   border: 0;
   background: transparent;
@@ -3047,8 +3053,8 @@ html:not([data-theme="light"]) .land-ask-key {
   color: var(--fg);
   caret-color: #6226ff;
   font: inherit;
-  letter-spacing: 0.08em;
-  line-height: inherit;
+  letter-spacing: inherit;
+  line-height: 1.5;
   outline: none;
 }
 
