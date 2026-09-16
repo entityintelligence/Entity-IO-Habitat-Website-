@@ -80,13 +80,13 @@ export function WaitlistForm({ tone = "paper" }: { tone?: "paper" | "field" }) {
         ) : null}
         <button
           type="button"
-          className={tone === "field" ? "land-ask-row land-ask-go" : "mono text-mute"}
+          className={tone === "field" ? "land-ask-back" : "mono text-mute"}
           onClick={() => {
             setSeat("");
             setStatus("idle");
           }}
         >
-          {tone === "field" ? <span className="land-ask-key">Back</span> : "Back"}
+          Back
         </button>
       </div>
     );
@@ -125,19 +125,24 @@ export function WaitlistForm({ tone = "paper" }: { tone?: "paper" | "field" }) {
           <span className="land-ask-key">Entity:</span>
           <input name="company" required autoComplete="organization" />
         </label>
-        {status === "error" ? <p className="land-ask-err">{message}</p> : null}
-        <button type="submit" disabled={status === "submitting"} className="land-ask-row land-ask-go">
-          <span className="land-ask-key">
-            {status === "submitting" ? "Sending" : "Enrollment"}
-            {status !== "submitting" ? (
-              <span className="land-ask-go-mark" aria-hidden="true">
-                <svg viewBox="0 0 12 12">
-                  <path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="0.85" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </span>
-            ) : null}
-          </span>
+        <button type="submit" disabled={status === "submitting"} className="land-ask-send">
+          <span>{status === "submitting" ? "Sending" : "Enrollment"}</span>
+          {status !== "submitting" ? (
+            <span className="land-ask-send-mark" aria-hidden="true">
+              <svg viewBox="0 0 16 16">
+                <path
+                  d="M3 8h9M8.5 4.5 12.5 8 8.5 11.5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.15"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </span>
+          ) : null}
         </button>
+        {status === "error" ? <p className="land-ask-err">{message}</p> : null}
       </form>
     );
   }
