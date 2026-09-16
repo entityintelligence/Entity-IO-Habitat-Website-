@@ -1053,6 +1053,7 @@ html[data-theme="light"] .feat-tile[data-film="1"][data-rise="-1"] {
 }
 
 .land-plot-hold .feat-tile[data-epic="1"],
+.land-spec-hold .feat-tile[data-epic="1"],
 .land-site[data-page="2"] .feat-tile[data-epic="1"] {
   transform: none;
 }
@@ -1367,6 +1368,7 @@ html:not([data-theme="light"]) .feat-epic-face {
   z-index: 2;
   transform: none;
   cursor: pointer;
+  pointer-events: auto;
   transition:
     box-shadow 0.22s ease,
     background 0.22s ease,

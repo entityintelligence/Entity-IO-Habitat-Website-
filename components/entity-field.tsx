@@ -93,7 +93,7 @@ const PATH_LEGS: { mile: MileAt; tiles: PathAt[] }[] = [
   },
 ];
 const PATH_CELL = new Map(PATH_LEGS.flatMap((leg) => leg.tiles.map((tile) => [`${tile.col},${tile.row}`, tile] as const)));
-const HUB_HOME = { c: 3, r: 7 };
+const HUB_HOME = { c: 4, r: 7 };
 const HUB_DEST = { c: 3, r: 11 };
 type Seat = { c: number; r: number };
 function isHub(col: number, row: number, hop = HUB_HOME) {
@@ -126,7 +126,7 @@ const DBL_MS = 320;
 function hubDist(col: number, row: number) {
   return Math.min(
     Math.abs(col - 3) + Math.abs(row - 1),
-    Math.abs(col - 3) + Math.abs(row - 7),
+    Math.abs(col - 4) + Math.abs(row - 7),
     Math.abs(col - 3) + Math.abs(row - 11),
   );
 }
@@ -145,7 +145,7 @@ type OfferPhase = "idle" | "jump" | "grow" | "play" | "stack" | "shrink" | "home
 type OfferWeb = "off" | "dist" | "in" | "make" | "proj";
 
 function pathHit(col: number, row: number, path: PathAt[] | null) {
-  if ((col === 3 && row === 1) || (col === 3 && row === 7) || !path) return null;
+  if ((col === 3 && row === 1) || (col === 4 && row === 7) || !path) return null;
   return path.find((item) => item.col === col && item.row === row) ?? null;
 }
 
