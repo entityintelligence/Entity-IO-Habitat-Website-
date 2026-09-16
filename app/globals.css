@@ -1620,14 +1620,14 @@ html[data-theme="light"] .land-spec .feat-tile[data-end="1"] {
 .feat-tile-pad {
   pointer-events: none;
   cursor: default;
-  opacity: 0.14;
+  opacity: 0.42;
   box-shadow:
-    0.18rem 0.22rem 0.55rem color-mix(in srgb, var(--fg) 5%, transparent),
-    -0.12rem -0.14rem 0.4rem color-mix(in srgb, #fff 28%, transparent);
+    0.28rem 0.38rem 0.85rem color-mix(in srgb, var(--fg) 7%, transparent),
+    -0.18rem -0.22rem 0.55rem color-mix(in srgb, #fff 42%, transparent);
 }
 
 html[data-theme="light"] .feat-tile-pad {
-  opacity: 0.18;
+  opacity: 0.48;
 }
 
 .feat-gap {
