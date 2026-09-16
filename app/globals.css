@@ -241,11 +241,6 @@ html[data-theme="light"] .land-site.split::before {
     --type-title: calc(var(--type-copy) - 2px);
   }
 
-  .feat-epic-mark {
-    width: min(3.9rem, 36%);
-    height: min(3.9rem, 36%);
-  }
-
   .land-hero,
   .land-hero-hold,
   .land-story-head {
