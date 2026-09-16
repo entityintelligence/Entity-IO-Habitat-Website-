@@ -95,9 +95,26 @@ const PATH_LEGS: { mile: MileAt; tiles: PathAt[] }[] = [
 const PATH_CELL = new Map(PATH_LEGS.flatMap((leg) => leg.tiles.map((tile) => [`${tile.col},${tile.row}`, tile] as const)));
 const HUB_HOME = { c: 4, r: 7 };
 const HUB_DEST = { c: 3, r: 11 };
-type Seat = { c: number; r: number };
+type Seat = { c: number; r: number; viaGap?: boolean };
+const GAP_HOP = -8;
 function isHub(col: number, row: number, hop = HUB_HOME) {
+  if (hop.viaGap) return false;
   return (col === 3 && row === 1) || (col === hop.c && row === hop.r);
+}
+function spliceGapHops(cells: FieldCell[], from: Seat, steps: number[], carouselCol: number, enabled: boolean) {
+  if (!enabled || steps.length === 0) return steps;
+  const out: number[] = [];
+  let prev = from;
+  for (const idx of steps) {
+    const cell = cells[idx];
+    if (!cell) continue;
+    const cross =
+      (prev.c < carouselCol && cell.col >= carouselCol) || (prev.c >= carouselCol && cell.col < carouselCol);
+    if (cross) out.push(GAP_HOP);
+    out.push(idx);
+    prev = { c: cell.col, r: cell.row };
+  }
+  return out;
 }
 function isInkMark(col: number, row: number, at: Seat | null) {
   return !!at && col === at.c && row === at.r;
@@ -261,6 +278,7 @@ export function EntityField({
   hubStart?: Seat;
   children: ReactNode;
 }) {
+  const padCols = usePadCols();
   const field = useMemo(() => {
     const next = buildField();
     if (!extraCells?.length) return next;
@@ -643,28 +661,33 @@ export function EntityField({
       const recorded = voyageRef.current.length
         ? voyageRef.current
         : hubStart
-          ? hubSteps(field.cells, hubStart, page, park, park)
+          ? spliceGapHops(field.cells, hubStart, hubSteps(field.cells, hubStart, page, park, park), park.c, padCols > 7)
           : [];
       const start = hubStart ? field.cells.findIndex((cell) => cell.col === hubStart.c && cell.row === hubStart.r) : -1;
       const back = [...recorded].reverse().slice(1);
       if (start >= 0) back.push(start);
       leaveRef.current = true;
       const first = back[0];
-      const cell = first != null ? field.cells[first] : null;
-      if (cell) setHubAt({ c: cell.col, r: cell.row });
+      if (first === GAP_HOP) {
+        setHubAt({ c: at.c, r: at.r, viaGap: true });
+      } else {
+        const cell = first != null ? field.cells[first] : null;
+        if (cell) setHubAt({ c: cell.col, r: cell.row });
+      }
       setHubTrail(back.slice(1));
       return;
     }
-    const steps = hubSteps(field.cells, at, page, inkAt, park);
+    const raw = hubSteps(field.cells, at, page, inkAt, park);
+    const steps = spliceGapHops(field.cells, at, raw, park.c, padCols > 7);
     if (hubStart && inkAt && inkAt.c === park.c && inkAt.r === park.r) {
       voyageRef.current = steps;
     }
     setHubTrail(steps);
-  }, [page, inkAt, field.cells, park, hubStart]);
+  }, [page, inkAt, field.cells, park, hubStart, padCols]);
 
   useEffect(() => {
     if (!inkShow || !inkAt) return;
-    if (hubAt.c !== inkAt.c || hubAt.r !== inkAt.r || hubTrail.length > 0) return;
+    if (hubAt.viaGap || hubAt.c !== inkAt.c || hubAt.r !== inkAt.r || hubTrail.length > 0) return;
     const id = window.setTimeout(() => setInkShow(false), 2200);
     return () => window.clearTimeout(id);
   }, [inkShow, inkAt, hubAt, hubTrail.length]);
@@ -677,8 +700,13 @@ export function EntityField({
     const wait = slow ? LEAVE_MS : STEP_MS;
     const id = window.setTimeout(() => {
       const [head, ...rest] = hubTrail;
-      const cell = field.cells[head];
-      if (cell) setHubAt({ c: cell.col, r: cell.row });
+      if (head === GAP_HOP) {
+        const here = hubAtRef.current;
+        setHubAt({ c: here.c, r: here.r, viaGap: true });
+      } else {
+        const cell = field.cells[head];
+        if (cell) setHubAt({ c: cell.col, r: cell.row });
+      }
       setHubTrail(rest);
     }, wait);
     return () => window.clearTimeout(id);
@@ -841,7 +869,9 @@ export function FieldTiles({
   const [recalling, setRecalling] = useState(false);
   const habitatOn = Boolean(carouselSeat && coverOn);
   const reelFlat = Boolean(carouselSeat && play && rangeRead === "habitat");
-  const hubOnCarousel = Boolean(carouselSeat && hubAt.c === carouselSeat.c && hubAt.r === carouselSeat.r);
+  const hubOnCarousel = Boolean(
+    carouselSeat && !hubAt.viaGap && hubAt.c === carouselSeat.c && hubAt.r === carouselSeat.r,
+  );
   const boardOut = docked || hubOnCarousel;
   const showPads = !carouselSeat || hubOnCarousel;
   const charged = Boolean(carouselSeat && !hubWalk && !recalling && (!docked || hubOnCarousel));
@@ -960,7 +990,7 @@ export function FieldTiles({
   }, [carouselSeat, rangeRead, play, restHub]);
   useEffect(() => {
     if (!carouselSeat || !play) return;
-    const here = hubAt.c === carouselSeat.c && hubAt.r === carouselSeat.r;
+    const here = !hubAt.viaGap && hubAt.c === carouselSeat.c && hubAt.r === carouselSeat.r;
     if (!here) {
       setAway(true);
       return;
@@ -1399,6 +1429,13 @@ export function FieldTiles({
           aria-hidden="true"
         >
           <CriticalPathHint />
+        </span>
+      ) : null}
+      {hubAt.viaGap && gapCol > 0 && Number.isFinite(minRow) ? (
+        <span className="range-gate" style={{ gridColumn: gapCol, gridRow: hubAt.r - minRow + 1 }}>
+          <button type="button" className="feat-tile" data-film="1" data-epic="1" aria-label="Habitat" tabIndex={0}>
+            <EpicMark />
+          </button>
         </span>
       ) : null}
       {showPads && gapCol > 0
