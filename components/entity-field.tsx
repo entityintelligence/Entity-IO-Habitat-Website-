@@ -820,7 +820,7 @@ export function FieldTiles({
 }) {
   const { cells, entityAt, goal, trail, wave, fore, setFore, go, jump, tap, open, kitOn, route, page, film, offer, offerPhase, offerPath, mileShow, boardShift, boardSeat, webOn, hubAt, hubWalk, hubStart, inkShow, inkAt, pickInk, recallHome, restHub } = useField();
   const cols = usePadCols();
-  const padCols = carouselSeat ? 7 : cols;
+  const padCols = cols;
   const lastTap = useRef<{ t: number; i: number } | null>(null);
   const onViewRef = useRef(onView);
   onViewRef.current = onView;
@@ -1401,7 +1401,7 @@ export function FieldTiles({
         const extra = Math.floor(index / Math.max(padRows, 1));
         const row = index % Math.max(padRows, 1);
         const col = 8 + extra;
-        if (row === padRows - 1 && col === padCols) return null;
+        if (!carouselSeat && row === padRows - 1 && col === padCols) return null;
         return (
           <i
             key={`pad-${extra}-${row}`}
