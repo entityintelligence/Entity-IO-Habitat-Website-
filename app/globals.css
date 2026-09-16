@@ -1045,7 +1045,7 @@ html[data-theme="light"] .feat-tile[data-film="1"][data-rise="-1"] {
 
 .feat-tile[data-epic="1"] {
   z-index: 8;
-  cursor: pointer;
+  cursor: default;
   pointer-events: auto;
   padding: 0;
   overflow: hidden;
@@ -2341,6 +2341,11 @@ html[data-theme="light"] .range-page.land-site[data-page="2"] .land-spec[data-of
   cursor: pointer;
 }
 
+.range-page .land-spec[data-habitat="1"] .feat-tile[data-film="1"][data-epic="1"],
+.range-page .land-spec .feat-tile[data-epic="1"] {
+  cursor: default;
+}
+
 .range-page .land-spec .feat-tile[data-ink="1"],
 .range-page .land-spec .feat-tile[data-epic="1"] {
   opacity: 1;
@@ -2523,6 +2528,10 @@ html[data-theme="light"] .range-page.land-site[data-page="2"] .land-spec[data-of
   --tile-drop: 0.34rem 0.48rem 1rem color-mix(in srgb, #000 34%, transparent);
   --tile-lift: -0.18rem -0.22rem 0.58rem color-mix(in srgb, #fff 6%, transparent);
   --tile-glow: transparent;
+}
+
+.range-page .range-reel-slide.is-hab {
+  cursor: default;
 }
 
 html[data-theme="light"] .range-page .range-reel-slide {

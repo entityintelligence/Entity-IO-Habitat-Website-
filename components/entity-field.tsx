@@ -821,8 +821,13 @@ export function FieldTiles({
   const { cells, entityAt, goal, trail, wave, fore, setFore, go, jump, tap, open, kitOn, route, page, film, offer, offerPhase, offerPath, mileShow, boardShift, boardSeat, webOn, hubAt, hubWalk, hubStart, inkShow, inkAt, pickInk, recallHome, restHub } = useField();
   const cols = usePadCols();
   const padCols = cols;
-  const seatShift = carouselSeat && padCols > 7 ? 1 : 0;
-  const track = (col: number) => col + 1 + (carouselSeat && col === carouselSeat.c ? seatShift : 0);
+  const pieceShift = (col: number, row: number) => {
+    if (padCols <= 7) return 0;
+    if (carouselSeat && col === carouselSeat.c) return 1;
+    if (!carouselSeat && isHub(col, row, hubAt)) return 1;
+    return 0;
+  };
+  const track = (col: number, row = 0) => col + 1 + pieceShift(col, row);
   const lastTap = useRef<{ t: number; i: number } | null>(null);
   const onViewRef = useRef(onView);
   onViewRef.current = onView;
@@ -842,6 +847,7 @@ export function FieldTiles({
   const reelFlat = Boolean(carouselSeat && play && rangeRead === "habitat");
   const hubOnCarousel = Boolean(carouselSeat && hubAt.c === carouselSeat.c && hubAt.r === carouselSeat.r);
   const boardOut = docked || hubOnCarousel;
+  const showPads = !carouselSeat || hubOnCarousel;
   const charged = Boolean(carouselSeat && !hubWalk && !recalling && (!docked || hubOnCarousel));
   const [flash, setFlash] = useState(false);
   const chargeRef = useRef<HTMLButtonElement | null>(null);
@@ -1113,13 +1119,13 @@ export function FieldTiles({
         const slot = boardSeat[at] ?? { c: cell.col, r: cell.row };
         const shove = boardShift[at];
         const style: CSSProperties = {
-          gridColumn: track(slot.c),
+          gridColumn: track(slot.c, slot.r),
           gridRow: Number.isFinite(minRow) ? slot.r - minRow + 1 : 1,
           ["--dc" as string]: shove?.dc ?? 0,
           ["--dr" as string]: shove?.dr ?? 0,
         };
         const home: CSSProperties = {
-          gridColumn: track(cell.col),
+          gridColumn: track(cell.col, cell.row),
           gridRow: Number.isFinite(minRow) ? cell.row - minRow + 1 : 1,
           ["--push" as string]: hubDist(cell.col, cell.row),
           ["--col" as string]: cell.col,
@@ -1187,7 +1193,7 @@ export function FieldTiles({
             <RangeCarousel
               key={`${cell.col}-${cell.row}`}
               style={{
-                gridColumn: track(carouselSeat.c),
+                gridColumn: track(carouselSeat.c, carouselSeat.r),
                 gridRow: "1 / -1",
               }}
               at={at}
@@ -1399,21 +1405,24 @@ export function FieldTiles({
           <CriticalPathHint />
         </span>
       ) : null}
-      {Array.from({ length: Math.max(0, padCols - 7) * padRows }, (_, index) => {
-        const extra = Math.floor(index / Math.max(padRows, 1));
-        const row = index % Math.max(padRows, 1);
-        const col = 8 + extra;
-        if (!carouselSeat && row === padRows - 1 && col === padCols) return null;
-        if (carouselSeat && col === track(carouselSeat.c)) return null;
-        return (
-          <i
-            key={`pad-${extra}-${row}`}
-            className="feat-tile feat-tile-pad"
-            style={{ gridColumn: col, gridRow: row + 1 }}
-            aria-hidden="true"
-          />
-        );
-      })}
+      {showPads
+        ? Array.from({ length: Math.max(0, padCols - 7) * padRows }, (_, index) => {
+            const extra = Math.floor(index / Math.max(padRows, 1));
+            const row = index % Math.max(padRows, 1);
+            const col = 8 + extra;
+            const lastCol = col === padCols;
+            if (!carouselSeat && lastCol && (row === padRows - 1 || zones.includes("join"))) return null;
+            if (carouselSeat && col === track(carouselSeat.c, carouselSeat.r)) return null;
+            return (
+              <i
+                key={`pad-${extra}-${row}`}
+                className="feat-tile feat-tile-pad"
+                style={{ gridColumn: col, gridRow: row + 1 }}
+                aria-hidden="true"
+              />
+            );
+          })
+        : null}
     </div>
   );
 }
