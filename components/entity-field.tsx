@@ -98,21 +98,29 @@ const HUB_DEST = { c: 3, r: 11 };
 type Seat = { c: number; r: number; viaGap?: boolean };
 const GAP_HOP = -8;
 function isHub(col: number, row: number, hop = HUB_HOME) {
-  if (hop.viaGap) return false;
   return (col === 3 && row === 1) || (col === hop.c && row === hop.r);
 }
-function spliceGapHops(cells: FieldCell[], from: Seat, steps: number[], carouselCol: number, enabled: boolean) {
-  if (!enabled || steps.length === 0) return steps;
+function colTrack(col: number, carouselCol: number | undefined, shift: number) {
+  return col + 1 + (carouselCol != null && col === carouselCol ? shift : 0);
+}
+function spliceGapHops(
+  cells: FieldCell[],
+  from: Seat,
+  steps: number[],
+  carouselCol: number | undefined,
+  shift: number,
+) {
+  if (!shift || carouselCol == null || steps.length === 0) return steps;
   const out: number[] = [];
-  let prev = from;
+  let prev = from.c;
   for (const idx of steps) {
     const cell = cells[idx];
     if (!cell) continue;
-    const cross =
-      (prev.c < carouselCol && cell.col >= carouselCol) || (prev.c >= carouselCol && cell.col < carouselCol);
-    if (cross) out.push(GAP_HOP);
+    if (Math.abs(colTrack(cell.col, carouselCol, shift) - colTrack(prev, carouselCol, shift)) > 1) {
+      out.push(GAP_HOP);
+    }
     out.push(idx);
-    prev = { c: cell.col, r: cell.row };
+    prev = cell.col;
   }
   return out;
 }
@@ -242,9 +250,10 @@ type FieldCtx = {
   boardShift: Record<string, { dc: number; dr: number }>;
   boardSeat: Record<string, { c: number; r: number }>;
   webOn: boolean;
-  hubAt: { c: number; r: number };
+  hubAt: Seat;
   hubWalk: boolean;
   hubStart: Seat | null;
+  padCols: number;
   inkShow: boolean;
   inkAt: Seat | null;
   pickInk: (col: number, row: number) => void;
@@ -661,7 +670,13 @@ export function EntityField({
       const recorded = voyageRef.current.length
         ? voyageRef.current
         : hubStart
-          ? spliceGapHops(field.cells, hubStart, hubSteps(field.cells, hubStart, page, park, park), park.c, padCols > 7)
+          ? spliceGapHops(
+              field.cells,
+              hubStart,
+              hubSteps(field.cells, hubStart, page, park, park),
+              hubSeat?.c,
+              hubSeat && padCols > 7 ? 1 : 0,
+            )
           : [];
       const start = hubStart ? field.cells.findIndex((cell) => cell.col === hubStart.c && cell.row === hubStart.r) : -1;
       const back = [...recorded].reverse().slice(1);
@@ -678,12 +693,12 @@ export function EntityField({
       return;
     }
     const raw = hubSteps(field.cells, at, page, inkAt, park);
-    const steps = spliceGapHops(field.cells, at, raw, park.c, padCols > 7);
+    const steps = spliceGapHops(field.cells, at, raw, hubSeat?.c, hubSeat && padCols > 7 ? 1 : 0);
     if (hubStart && inkAt && inkAt.c === park.c && inkAt.r === park.r) {
       voyageRef.current = steps;
     }
     setHubTrail(steps);
-  }, [page, inkAt, field.cells, park, hubStart, padCols]);
+  }, [page, inkAt, field.cells, park, hubSeat, hubStart, padCols]);
 
   useEffect(() => {
     if (!inkShow || !inkAt) return;
@@ -753,6 +768,7 @@ export function EntityField({
       hubAt,
       hubWalk: hubTrail.length > 0,
       hubStart: hubStart ?? null,
+      padCols,
       inkShow,
       inkAt,
       pickInk,
@@ -762,20 +778,22 @@ export function EntityField({
       endFilm,
       returnOffer,
     }),
-    [field.cells, entityAt, goal, trail, wave, fore, go, jump, tap, open, kitOn, holdKit, route, watchMs, watchPrev, watchPrevMs, watchRun, page, film, filmAt, offer, offerPhase, offerLine, offerMorph, offerWeb, offerPath, mileShow, boardFlip, boardShift, boardSeat, webOn, hubAt, hubTrail.length, hubStart, inkShow, inkAt, pickInk, recallHome, restHub, toggleWeb, endFilm, returnOffer],
+    [field.cells, entityAt, goal, trail, wave, fore, go, jump, tap, open, kitOn, holdKit, route, watchMs, watchPrev, watchPrevMs, watchRun, page, film, filmAt, offer, offerPhase, offerLine, offerMorph, offerWeb, offerPath, mileShow, boardFlip, boardShift, boardSeat, webOn, hubAt, hubTrail.length, hubStart, padCols, inkShow, inkAt, pickInk, recallHome, restHub, toggleWeb, endFilm, returnOffer],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
+function readPadCols() {
+  if (typeof window === "undefined") return 7;
+  if (window.matchMedia("(min-width: 120rem)").matches) return 9;
+  if (window.matchMedia("(min-width: 105rem)").matches) return 8;
+  return 7;
+}
 function usePadCols() {
-  const [cols, setCols] = useState(7);
+  const [cols, setCols] = useState(readPadCols);
   useEffect(() => {
-    const apply = () => {
-      if (window.matchMedia("(min-width: 120rem)").matches) setCols(9);
-      else if (window.matchMedia("(min-width: 105rem)").matches) setCols(8);
-      else setCols(7);
-    };
+    const apply = () => setCols(readPadCols());
     apply();
     window.addEventListener("resize", apply);
     return () => window.removeEventListener("resize", apply);
@@ -846,11 +864,9 @@ export function FieldTiles({
   onCover?: (on: boolean) => void;
   showCells?: string[];
 }) {
-  const { cells, entityAt, goal, trail, wave, fore, setFore, go, jump, tap, open, kitOn, route, page, film, offer, offerPhase, offerPath, mileShow, boardShift, boardSeat, webOn, hubAt, hubWalk, hubStart, inkShow, inkAt, pickInk, recallHome, restHub } = useField();
-  const cols = usePadCols();
-  const padCols = cols;
+  const { cells, entityAt, goal, trail, wave, fore, setFore, go, jump, tap, open, kitOn, route, page, film, offer, offerPhase, offerPath, mileShow, boardShift, boardSeat, webOn, hubAt, hubWalk, hubStart, padCols, inkShow, inkAt, pickInk, recallHome, restHub } = useField();
   const seatShift = carouselSeat && padCols > 7 ? 1 : 0;
-  const track = (col: number) => col + 1 + (carouselSeat && col === carouselSeat.c ? seatShift : 0);
+  const track = (col: number) => colTrack(col, carouselSeat?.c, seatShift);
   const gapCol = carouselSeat && seatShift ? track(carouselSeat.c) - 1 : 0;
   const lastTap = useRef<{ t: number; i: number } | null>(null);
   const onViewRef = useRef(onView);
@@ -1151,7 +1167,7 @@ export function FieldTiles({
           ["--dr" as string]: shove?.dr ?? 0,
         };
         const home: CSSProperties = {
-          gridColumn: track(cell.col),
+          gridColumn: hubAt.viaGap && gapCol > 0 && isHub(cell.col, cell.row, hubAt) ? gapCol : track(cell.col),
           gridRow: Number.isFinite(minRow) ? cell.row - minRow + 1 : 1,
           ["--push" as string]: hubDist(cell.col, cell.row),
           ["--col" as string]: cell.col,
@@ -1429,13 +1445,6 @@ export function FieldTiles({
           aria-hidden="true"
         >
           <CriticalPathHint />
-        </span>
-      ) : null}
-      {hubAt.viaGap && gapCol > 0 && Number.isFinite(minRow) ? (
-        <span className="range-gate" style={{ gridColumn: gapCol, gridRow: hubAt.r - minRow + 1 }}>
-          <button type="button" className="feat-tile" data-film="1" data-epic="1" aria-label="Habitat" tabIndex={0}>
-            <EpicMark />
-          </button>
         </span>
       ) : null}
       {showPads && gapCol > 0
