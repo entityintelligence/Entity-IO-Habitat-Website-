@@ -234,17 +234,47 @@ html[data-theme="light"] .land-site.split::before {
   }
 }
 
+/* 1920×1080 PC — extra field column only. 16″ MBP (~108rem) stays on the base type. */
 @media (min-width: 120rem) {
   .land-site {
     --feat-cols: 9;
-    --type-copy: clamp(0.92rem, 0.68vw, 1.08rem);
+  }
+}
+
+/* 24″ iMac (~2240 CSS px) */
+@media (min-width: 140rem) {
+  :root {
+    --type-copy: clamp(1.28rem, 1.05vw, 1.5rem);
     --type-title: calc(var(--type-copy) - 2px);
   }
 
   .land-hero,
   .land-hero-hold,
-  .land-story-head {
+  .land-story-head,
+  .land-head .head-brand,
+  .land-head .land-time,
+  .head-brand,
+  .head-link,
+  .theme-toggle {
     font-size: var(--type-title);
+  }
+
+  .land-mid,
+  .feat-card h2,
+  .land-cat {
+    font-size: var(--type-copy);
+  }
+
+  .feat-offer-copy:not(.is-mod) {
+    font-size: calc(var(--type-copy) - 1px);
+  }
+}
+
+/* 27″ iMac / Studio Display (~2560 CSS px) — copy ~180% of the 16″ size */
+@media (min-width: 160rem) {
+  :root {
+    --type-copy: clamp(1.55rem, 1.1vw, 1.76rem);
+    --type-title: calc(var(--type-copy) - 2px);
   }
 }
 
@@ -4866,4 +4896,27 @@ html[data-theme="light"] .kit-sys-reading:hover span {
   font-style: normal;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+@media (min-width: 140rem) {
+  .land-hero,
+  .land-hero-hold,
+  .land-story-head,
+  .land-head .head-brand,
+  .land-head .land-time,
+  .head-brand,
+  .head-link,
+  .theme-toggle {
+    font-size: var(--type-title);
+  }
+
+  .land-mid,
+  .feat-card h2,
+  .land-cat {
+    font-size: var(--type-copy);
+  }
+
+  .feat-offer-copy:not(.is-mod) {
+    font-size: calc(var(--type-copy) - 1px);
+  }
 }
