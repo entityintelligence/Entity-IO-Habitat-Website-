@@ -218,14 +218,26 @@ html[data-theme="light"] .land-site.split::before {
   --spine: 1.85rem;
   --rail-inset: 3.85rem;
   --feat-g: 1rem;
+  --feat-cols: 7;
   --feat-tile: min(
-    10.5rem,
-    calc((100vw - 2 * var(--rail-inset) - 6 * var(--feat-g)) / 7),
-    calc((var(--view) - 13rem - 2 * var(--feat-g)) / 3)
+    calc((100vw - 2 * var(--rail-inset) - (var(--feat-cols) - 1) * var(--feat-g)) / var(--feat-cols)),
+    calc((var(--view) - 12rem - 2 * var(--feat-g)) / 3)
   );
-  --feat-board: calc(7 * var(--feat-tile) + 6 * var(--feat-g));
+  --feat-board: calc(var(--feat-cols) * var(--feat-tile) + (var(--feat-cols) - 1) * var(--feat-g));
   --feat-pitch: calc(var(--feat-tile) + var(--feat-g));
   --board-y0: calc(var(--view) / 2 - 0.35in + var(--field-nudge, 0px) - (3 * var(--feat-tile) + 2 * var(--feat-g)) / 2);
+}
+
+@media (min-width: 105rem) {
+  .land-site {
+    --feat-cols: 8;
+  }
+}
+
+@media (min-width: 120rem) {
+  .land-site {
+    --feat-cols: 9;
+  }
 }
 
 .land-spine {
@@ -795,19 +807,13 @@ html:not([data-theme="light"]) .land-head .head-sep {
 
 .feat-join {
   --feat-g: 1rem;
-  --feat-tile: min(
-    10.5rem,
-    calc((100vw - 2 * var(--rail-inset, 3.85rem) - 6 * var(--feat-g)) / 7),
-    calc((100svh - 13rem - 2 * var(--feat-g)) / 3)
-  );
-  --feat-board: calc(7 * var(--feat-tile) + 6 * var(--feat-g));
   --tile-drop: 0.4rem 0.58rem 1.2rem color-mix(in srgb, #000 42%, transparent);
   --tile-lift: -0.22rem -0.28rem 0.7rem color-mix(in srgb, #fff 7%, transparent);
   --tile-skin: inset 0.12rem 0.16rem 0.42rem color-mix(in srgb, #fff 9%, transparent);
   --tile-sheen: color-mix(in srgb, #fff 8%, transparent);
   position: relative;
   display: grid;
-  grid-template-columns: repeat(7, var(--feat-tile));
+  grid-template-columns: repeat(var(--feat-cols, 7), var(--feat-tile));
   grid-auto-rows: var(--feat-tile);
   gap: var(--feat-g);
   width: var(--feat-board);
@@ -858,12 +864,6 @@ html[data-theme="light"] .feat-board {
 
 .feat-grid {
   --feat-g: 1rem;
-  --feat-tile: min(
-    10.5rem,
-    calc((100vw - 2 * var(--rail-inset, 3.85rem) - 6 * var(--feat-g)) / 7),
-    calc((100svh - 13rem - 2 * var(--feat-g)) / 3)
-  );
-  --feat-board: calc(7 * var(--feat-tile) + 6 * var(--feat-g));
   position: relative;
   left: auto;
   right: auto;
@@ -871,7 +871,7 @@ html[data-theme="light"] .feat-board {
   z-index: 2;
   display: grid;
   box-sizing: border-box;
-  grid-template-columns: repeat(7, var(--feat-tile));
+  grid-template-columns: repeat(var(--feat-cols, 7), var(--feat-tile));
   grid-template-rows: repeat(3, var(--feat-tile));
   gap: var(--feat-g);
   width: var(--feat-board);
@@ -1617,6 +1617,11 @@ html[data-theme="light"] .land-spec .feat-tile[data-end="1"] {
   z-index: 2;
 }
 
+.feat-tile-pad {
+  pointer-events: none;
+  cursor: default;
+}
+
 .feat-gap {
   display: flex;
   min-width: 0;
@@ -1716,12 +1721,6 @@ html:not([data-theme="light"]) .feat-tile h2.land-hero-ink {
 
 .land-spec-hold {
   --feat-g: 1rem;
-  --feat-tile: min(
-    10.5rem,
-    calc((100vw - 2 * var(--rail-inset, 3.85rem) - 6 * var(--feat-g)) / 7),
-    calc((100svh - 13rem - 2 * var(--feat-g)) / 3)
-  );
-  --feat-board: calc(7 * var(--feat-tile) + 6 * var(--feat-g));
   --feat-pitch: calc(var(--feat-tile) + var(--feat-g));
   --board-row: 5;
   --board-page: 1;
@@ -1735,12 +1734,6 @@ html:not([data-theme="light"]) .feat-tile h2.land-hero-ink {
 
 .land-spec {
   --feat-g: 1rem;
-  --feat-tile: min(
-    10.5rem,
-    calc((100vw - 2 * var(--rail-inset, 3.85rem) - 6 * var(--feat-g)) / 7),
-    calc((100svh - 13rem - 2 * var(--feat-g)) / 3)
-  );
-  --feat-board: calc(7 * var(--feat-tile) + 6 * var(--feat-g));
   --tile-drop: 0.4rem 0.58rem 1.2rem color-mix(in srgb, #000 42%, transparent);
   --tile-lift: -0.22rem -0.28rem 0.7rem color-mix(in srgb, #fff 7%, transparent);
   --tile-skin: inset 0.12rem 0.16rem 0.42rem color-mix(in srgb, #fff 9%, transparent);
@@ -1748,7 +1741,7 @@ html:not([data-theme="light"]) .feat-tile h2.land-hero-ink {
   position: relative;
   z-index: 3;
   display: grid;
-  grid-template-columns: repeat(7, var(--feat-tile));
+  grid-template-columns: repeat(var(--feat-cols, 7), var(--feat-tile));
   grid-template-rows: repeat(4, var(--feat-tile));
   gap: var(--feat-g);
   width: var(--feat-board);
@@ -2894,17 +2887,30 @@ html:not([data-theme="light"]) .land-core-kicker .land-hero-live {
 }
 
 .split-stage.land.land-seat-stage {
-  display: block;
-  padding-top: calc(14.15rem - 0.5in);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding-top: 0;
+  padding-bottom: 0;
   overflow: visible;
 }
 
 .land-seat-stage .land-story-col {
   width: calc(3 * var(--feat-tile) + 2 * var(--feat-g));
   max-width: calc(100% - 2.5rem);
+  height: 100%;
+  box-sizing: border-box;
+  padding-top: calc(14.15rem - 0.5in);
+  padding-bottom: 3.5rem;
 }
 
+.land-seat-stage .land-story-body,
 .land-seat-stage .land-story-copy {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
   width: 100%;
   max-width: none;
 }
@@ -2918,10 +2924,17 @@ html:not([data-theme="light"]) .land-core-kicker .land-hero-live {
   max-width: none;
 }
 
-.land-seat-stage .land-ask-form {
-  margin-top: 4.15rem;
+.land-seat-stage .land-story .land-mid::after {
+  content: none;
+}
+
+.land-seat-stage .land-ask-form,
+.land-seat-stage .land-ask-ok {
+  margin-top: auto;
+  padding-top: 0;
   width: 100%;
   max-width: none;
+  border-top: 1px solid color-mix(in srgb, var(--fg) 12%, transparent);
 }
 
 .land-ask-form {
@@ -2933,8 +2946,8 @@ html:not([data-theme="light"]) .land-core-kicker .land-hero-live {
   font-family: var(--font-plex), "IBM Plex Sans KR", "Helvetica Neue", sans-serif;
   font-size: var(--type-title);
   font-weight: 400;
-  letter-spacing: 0.14em;
-  line-height: 1.35;
+  letter-spacing: 0.18em;
+  line-height: 1.5;
 }
 
 .land-ask-row {
@@ -3063,16 +3076,14 @@ html:not([data-theme="light"]) .land-ask-opt[data-on] {
 .land-ask-ok {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 1.15rem;
+  align-items: stretch;
+  gap: 0;
 }
 
 .land-ask-ok .land-ask-go {
-  margin-top: 0.35rem;
-  display: inline;
+  margin-top: 0;
+  display: flex;
   grid-template-columns: none;
-  border: 0;
-  padding: 0;
 }
 
 .land-ask-seats {
@@ -3088,7 +3099,20 @@ html:not([data-theme="light"]) .land-ask-opt[data-on] {
 
 .land-ask-ok-line {
   margin: 0;
+  padding: 0.95rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--fg) 12%, transparent);
   color: var(--fg);
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+.land-ask-ok-note {
+  margin: 0;
+  padding: 0.95rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--fg) 12%, transparent);
+  color: var(--fg-mute);
+  font: inherit;
+  letter-spacing: inherit;
 }
 
 html:not([data-theme="light"]) .land-ask-ok-line {
@@ -4083,8 +4107,11 @@ html[data-theme="light"] .kit-sys-reading:hover span {
     padding-right: 0;
   }
 
-  .split-stage.land.land-story,
-  .split-stage.land.land-seat-stage {
+  .split-stage.land.land-story:not(.land-seat-stage) {
+    padding-top: calc(13.25rem - 0.5in);
+  }
+
+  .land-seat-stage .land-story-col {
     padding-top: calc(13.25rem - 0.5in);
   }
 
@@ -4155,6 +4182,7 @@ html[data-theme="light"] .kit-sys-reading:hover span {
     --spine: 0.85rem;
     --rail-inset: 1.65rem;
     --feat-g: 0.65rem;
+    --feat-cols: 7;
   }
 
   .offer {

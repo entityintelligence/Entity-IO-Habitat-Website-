@@ -70,8 +70,9 @@ export function WaitlistForm({ tone = "paper" }: { tone?: "paper" | "field" }) {
 
   if (status === "ok") {
     return (
-      <div className={tone === "field" ? "land-ask-ok" : "join-ok"}>
-        <p className={tone === "field" ? "land-ask-ok-line" : "join-ok-title"}>{story.ok}</p>
+      <div className={tone === "field" ? "land-ask-form land-ask-ok" : "join-ok"}>
+        <p className={tone === "field" ? "land-ask-ok-line" : "join-ok-title"}>You’re on the list.</p>
+        {tone === "field" ? <p className="land-ask-ok-note">We’ll write.</p> : null}
         {tone !== "field" && waiting !== null ? (
           <p className="wait-count">
             {padWaiting(waiting)} {story.waiting}
@@ -79,13 +80,13 @@ export function WaitlistForm({ tone = "paper" }: { tone?: "paper" | "field" }) {
         ) : null}
         <button
           type="button"
-          className={tone === "field" ? "land-ask-go" : "mono text-mute"}
+          className={tone === "field" ? "land-ask-row land-ask-go" : "mono text-mute"}
           onClick={() => {
             setSeat("");
             setStatus("idle");
           }}
         >
-          Back
+          {tone === "field" ? <span className="land-ask-key">Back</span> : "Back"}
         </button>
       </div>
     );

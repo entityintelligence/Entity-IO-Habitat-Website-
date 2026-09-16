@@ -740,6 +740,21 @@ export function EntityField({
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
+function usePadCols() {
+  const [cols, setCols] = useState(7);
+  useEffect(() => {
+    const apply = () => {
+      if (window.matchMedia("(min-width: 120rem)").matches) setCols(9);
+      else if (window.matchMedia("(min-width: 105rem)").matches) setCols(8);
+      else setCols(7);
+    };
+    apply();
+    window.addEventListener("resize", apply);
+    return () => window.removeEventListener("resize", apply);
+  }, []);
+  return cols;
+}
+
 function EpicMark({ ink = false }: { ink?: boolean }) {
   return (
     <svg className={`feat-epic-mark${ink ? " is-ink" : ""}`} viewBox="0 0 64 64" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
@@ -804,6 +819,8 @@ export function FieldTiles({
   showCells?: string[];
 }) {
   const { cells, entityAt, goal, trail, wave, fore, setFore, go, jump, tap, open, kitOn, route, page, film, offer, offerPhase, offerPath, mileShow, boardShift, boardSeat, webOn, hubAt, hubWalk, hubStart, inkShow, inkAt, pickInk, recallHome, restHub, toggleWeb } = useField();
+  const cols = usePadCols();
+  const padCols = carouselSeat ? 7 : cols;
   const lastTap = useRef<{ t: number; i: number } | null>(null);
   const onViewRef = useRef(onView);
   onViewRef.current = onView;
@@ -1049,6 +1066,8 @@ export function FieldTiles({
     .map((cell, index) => ({ cell, index }))
     .filter((item) => zones.includes(item.cell.zone) && !hideRows?.includes(item.cell.row));
   const minRow = zone.reduce((min, item) => Math.min(min, item.cell.row), Number.POSITIVE_INFINITY);
+  const maxRow = zone.reduce((max, item) => Math.max(max, item.cell.row), 0);
+  const padRows = Number.isFinite(minRow) ? maxRow - minRow + 1 : 0;
   const beating = goal !== null || trail.length > 0;
   const beatAt = new Map(beating ? route.map((index, step) => [index, step + 1]) : []);
 
@@ -1380,6 +1399,18 @@ export function FieldTiles({
           <CriticalPathHint />
         </span>
       ) : null}
+      {Array.from({ length: Math.max(0, padCols - 7) * padRows }, (_, index) => {
+        const extra = Math.floor(index / Math.max(padRows, 1));
+        const row = index % Math.max(padRows, 1);
+        return (
+          <i
+            key={`pad-${extra}-${row}`}
+            className="feat-tile feat-tile-pad"
+            style={{ gridColumn: 8 + extra, gridRow: row + 1 }}
+            aria-hidden="true"
+          />
+        );
+      })}
     </div>
   );
 }
