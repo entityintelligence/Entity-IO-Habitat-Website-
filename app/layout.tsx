@@ -51,10 +51,6 @@ export const metadata: Metadata = {
   description:
     "Entity | IO. The next generation of enterprise planning. Predict the entity. Approve the path. Let the system carry the rest.",
   metadataBase: new URL("https://entityintelligence.io"),
-  icons: {
-    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
-    apple: [{ url: "/icon.svg" }],
-  },
   openGraph: {
     title: "Entity | IO",
     siteName: "Entity | IO",
