@@ -126,7 +126,7 @@ export function WaitlistForm({ tone = "paper" }: { tone?: "paper" | "field" }) {
           <input name="company" required autoComplete="organization" />
         </label>
         <button type="submit" disabled={status === "submitting"} className="land-ask-send">
-          <span>{status === "submitting" ? "Sending" : "Enrollment"}</span>
+          <span>{status === "submitting" ? "Sending" : "Submit"}</span>
           {status !== "submitting" ? (
             <span className="land-ask-send-mark" aria-hidden="true">
               <svg viewBox="0 0 16 16">
@@ -185,7 +185,7 @@ export function WaitlistForm({ tone = "paper" }: { tone?: "paper" | "field" }) {
       </fieldset>
       {status === "error" ? <p className="mono">{message}</p> : null}
       <button type="submit" disabled={status === "submitting"} className="funnel-cta">
-        {status === "submitting" ? "Sending" : "Enrollment"}
+        {status === "submitting" ? "Sending" : "Submit"}
       </button>
     </form>
   );
