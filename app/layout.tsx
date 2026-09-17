@@ -53,11 +53,11 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://entityintelligence.io"),
   icons: {
     icon: [
-      { url: "/entity-mark-v3.ico", sizes: "48x48" },
+      { url: "/favicon.ico", sizes: "48x48", type: "image/x-icon" },
       { url: "/icon-32.png", type: "image/png", sizes: "32x32" },
     ],
-    shortcut: "/entity-mark-v3.ico",
-    apple: [{ url: "/apple-icon.png", sizes: "180x180" }],
+    shortcut: "/favicon.ico",
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
   },
   openGraph: {
     title: "Entity | IO",
@@ -74,9 +74,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       className={`${fragment.variable} ${plex.variable} ${oswald.variable} ${cy.variable} ${formaDisplay.variable} ${formaMicro.variable}`}
     >
       <head>
-        <link rel="icon" href="/entity-mark-v3.ico" sizes="any" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" href="/icon-32.png" type="image/png" sizes="32x32" />
-        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#f3f3f1" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#111111" />
         <script
           dangerouslySetInnerHTML={{
             __html: `document.documentElement.setAttribute("data-theme","light");try{localStorage.setItem("kit-theme","light");}catch(e){}`,
