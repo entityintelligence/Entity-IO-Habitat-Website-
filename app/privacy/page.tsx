@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Entity | IO" };
+export const metadata: Metadata = { title: "Entity Intelligence" };
 
 export default function PrivacyPage() {
   return (

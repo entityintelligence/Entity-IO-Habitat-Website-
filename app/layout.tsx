@@ -46,10 +46,10 @@ const formaMicro = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Entity | IO",
-  applicationName: "Entity | IO",
+  title: "Entity Intelligence",
+  applicationName: "Entity Intelligence",
   description:
-    "Entity | IO. The next generation of enterprise planning. Predict the entity. Approve the path. Let the system carry the rest.",
+    "Entity Intelligence. The next generation of enterprise planning. Predict the entity. Approve the path. Let the system carry the rest.",
   metadataBase: new URL("https://entityintelligence.io"),
   icons: {
     icon: [
@@ -60,8 +60,8 @@ export const metadata: Metadata = {
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
   },
   openGraph: {
-    title: "Entity | IO",
-    siteName: "Entity | IO",
+    title: "Entity Intelligence",
+    siteName: "Entity Intelligence",
   },
 };
 
