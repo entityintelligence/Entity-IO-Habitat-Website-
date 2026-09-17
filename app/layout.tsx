@@ -46,10 +46,19 @@ const formaMicro = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "KIT — Entity io",
+  title: "Entity | IO",
+  applicationName: "Entity | IO",
   description:
-    "KIT by Entity io. The next generation of enterprise planning. Predict the entity. Approve the path. Let the system carry the rest.",
+    "Entity | IO. The next generation of enterprise planning. Predict the entity. Approve the path. Let the system carry the rest.",
   metadataBase: new URL("https://entityintelligence.io"),
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/icon.svg" }],
+  },
+  openGraph: {
+    title: "Entity | IO",
+    siteName: "Entity | IO",
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

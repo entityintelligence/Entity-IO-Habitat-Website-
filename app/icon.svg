@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <style>
+    .mark {
+      stroke: #111;
+      stroke-width: 3.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    @media (prefers-color-scheme: dark) {
+      .mark {
+        stroke: #f3f3f1;
+      }
+    }
+  </style>
+  <g transform="translate(-3.5 0)">
+    <path class="mark" d="M27 11 L13 22 L13 42 L27 53" />
+  </g>
+  <g transform="translate(3.5 0)">
+    <path class="mark" d="M37 11 L51 22 L51 42 L37 53" />
+  </g>
+</svg>
