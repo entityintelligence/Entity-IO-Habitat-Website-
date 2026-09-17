@@ -51,6 +51,14 @@ export const metadata: Metadata = {
   description:
     "Entity | IO. The next generation of enterprise planning. Predict the entity. Approve the path. Let the system carry the rest.",
   metadataBase: new URL("https://entityintelligence.io"),
+  icons: {
+    icon: [
+      { url: "/entity-mark.ico", sizes: "48x48" },
+      { url: "/icon-32.png", type: "image/png", sizes: "32x32" },
+    ],
+    shortcut: "/entity-mark.ico",
+    apple: [{ url: "/apple-icon.png", sizes: "180x180" }],
+  },
   openGraph: {
     title: "Entity | IO",
     siteName: "Entity | IO",
@@ -66,6 +74,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       className={`${fragment.variable} ${plex.variable} ${oswald.variable} ${cy.variable} ${formaDisplay.variable} ${formaMicro.variable}`}
     >
       <head>
+        <link rel="icon" href="/entity-mark.ico" sizes="any" />
+        <link rel="icon" href="/icon-32.png" type="image/png" sizes="32x32" />
+        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#f3f3f1" />
         <script
           dangerouslySetInnerHTML={{
             __html: `document.documentElement.setAttribute("data-theme","light");try{localStorage.setItem("kit-theme","light");}catch(e){}`,
