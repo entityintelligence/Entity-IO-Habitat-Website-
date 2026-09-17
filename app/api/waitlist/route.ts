@@ -1,6 +1,9 @@
 import { appendWaitlist, waitingCount } from "@/lib/wait-count";
 import { NextResponse } from "next/server";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 const SEATS = new Set(["design-partner", "waitlist"]);
 const INBOX = "hello@entityintelligence.io";
 
@@ -10,6 +13,12 @@ type Payload = {
   company?: string;
   seat?: string;
 };
+
+function readEnv(name: string) {
+  const value = process.env[name];
+  if (!value || value === "[SENSITIVE]") return "";
+  return value.trim();
+}
 
 function valid(body: Payload) {
   const email = body.email?.trim() ?? "";
@@ -23,8 +32,8 @@ function valid(body: Payload) {
 }
 
 function fromAddresses() {
-  const listed = [process.env.WAITLIST_FROM, `Entity IO <${INBOX}>`, "Entity IO <onboarding@resend.dev>"];
-  return listed.filter((value, index, list): value is string => Boolean(value) && list.indexOf(value) === index);
+  const listed = [readEnv("WAITLIST_FROM"), `Entity Intelligence <${INBOX}>`, "Entity Intelligence <onboarding@resend.dev>"];
+  return listed.filter((value, index, list) => Boolean(value) && list.indexOf(value) === index);
 }
 
 async function sendEnquiry(record: {
@@ -34,12 +43,12 @@ async function sendEnquiry(record: {
   seat?: string;
   receivedAt: string;
 }) {
-  const key = process.env.RESEND_API_KEY;
+  const key = readEnv("RESEND_API_KEY");
   if (!key) {
     throw new Error("Mail is not configured.");
   }
 
-  const to = INBOX;
+  const to = readEnv("WAITLIST_TO") || INBOX;
   const text = [
     `Name: ${record.name}`,
     `Email: ${record.email}`,
@@ -67,7 +76,7 @@ async function sendEnquiry(record: {
     const body = await res.text();
     if (res.ok) return;
     last = body.slice(0, 400) || last;
-    console.error("waitlist mail failed", res.status, from, last);
+    console.error("waitlist mail failed", res.status, from.split("<").pop() ?? from, last);
   }
 
   throw new Error(last);
@@ -106,7 +115,10 @@ export async function POST(request: Request) {
   try {
     await sendEnquiry(record);
   } catch (error) {
-    console.error("waitlist mail error", error instanceof Error ? error.message : error);
+    console.error("waitlist mail error", error instanceof Error ? error.message : error, {
+      hasResend: Boolean(readEnv("RESEND_API_KEY")),
+      mailKeys: Object.keys(process.env).filter((key) => key.startsWith("RESEND") || key.startsWith("WAITLIST")),
+    });
     return NextResponse.json({ error: "Could not send. Write to hello@entityintelligence.io." }, { status: 502 });
   }
 
