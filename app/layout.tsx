@@ -53,10 +53,11 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://entityintelligence.io"),
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "48x48", type: "image/x-icon" },
-      { url: "/icon-32.png", type: "image/png", sizes: "32x32" },
+      { url: "/favicon-light.ico", media: "(prefers-color-scheme: light)", type: "image/x-icon" },
+      { url: "/favicon-dark.ico", media: "(prefers-color-scheme: dark)", type: "image/x-icon" },
+      { url: "/icon-light.png", media: "(prefers-color-scheme: light)", type: "image/png", sizes: "32x32" },
+      { url: "/icon-dark.png", media: "(prefers-color-scheme: dark)", type: "image/png", sizes: "32x32" },
     ],
-    shortcut: "/favicon.ico",
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
   },
   openGraph: {
@@ -74,9 +75,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       className={`${fragment.variable} ${plex.variable} ${oswald.variable} ${cy.variable} ${formaDisplay.variable} ${formaMicro.variable}`}
     >
       <head>
-        <link rel="shortcut icon" href="/favicon.ico" />
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" href="/icon-32.png" type="image/png" sizes="32x32" />
+        <link rel="icon" href="/favicon-light.ico" media="(prefers-color-scheme: light)" />
+        <link rel="icon" href="/favicon-dark.ico" media="(prefers-color-scheme: dark)" />
+        <link rel="icon" href="/icon-light.png" type="image/png" sizes="32x32" media="(prefers-color-scheme: light)" />
+        <link rel="icon" href="/icon-dark.png" type="image/png" sizes="32x32" media="(prefers-color-scheme: dark)" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#111111" />
         <script
